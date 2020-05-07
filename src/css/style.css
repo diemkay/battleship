@@ -23,15 +23,13 @@ main {
 /* temp borders to figure out the screens  */
 main,
 section {
-  margin: 20px;
-  /* border: 1px solid var(--oc-blue-9); */
-  /* width: 450px;
-  height: 450px; */
+  margin: 2em;
 }
 
 #game-screen {
   display: flex;
   flex-direction: row;
+  align-items: center;
 }
 
 @media screen and (max-width: 1024px) {
@@ -40,15 +38,61 @@ section {
   }
 }
 
+#replica-ships {
+  width: 200px;
+  height: 400px;
+  background-color: var(--oc-blue-7);
+  border-radius: 3px;
+  color: whitesmoke;
+  text-align: center;
+  font-family: 'Raleway';
+  text-transform: uppercase;
+}
+
+.replica {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: left;
+  margin: 1em;
+}
+
+.small-square {
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--oc-red-1);
+  background-color: var(--oc-red-9);
+}
+
+.replica-title {
+  font-size: 14px;
+  margin: 0.9em;
+  font-weight: 700;
+}
+
+/* TODO: FIX THIS SCREEN SO THINGS FIT NICELY!!!  */
+
+@media screen and (max-width: 1024px) {
+  #replica-ships {
+    width: 400px;
+    height: 250px;
+  }
+  .replica-title {
+    margin: 0.2em;
+  }
+}
+
 .player-title {
   color: var(--oc-red-7);
   text-align: center;
 }
 
+/* BOARD  */
+
 .board {
   width: 400px;
   height: 400px;
-  border: 1px solid var(--oc-gray-5);
+  border: 2px solid var(--oc-gray-5);
   margin: 1em 2em 2em 1em;
   display: flex;
   flex-wrap: wrap;
@@ -60,6 +104,48 @@ section {
   box-sizing: border-box;
   background: #f6f8f9;
   border: 1px solid var(--oc-gray-3);
+}
+
+/* SQUARE COLORS */
+
+/* Empty */
+.board .empty {
+  background-color: var(--oc-gray-1);
+}
+.board .empty:hover {
+  background-color: var(--oc-red-2);
+}
+
+/* Ship */
+
+.board .ship {
+  background-color: var(--oc-blue-8);
+  border: 1px solid var(--oc-blue-9);
+}
+
+.board .ship:hover {
+  background-color: var(--oc-blue-9);
+}
+
+/* Hit  */
+
+.board .hit {
+  background-color: var(--oc-red-8);
+  border: 1px solid var(--oc-red-9);
+}
+
+/* Miss */
+
+.board .miss {
+  background-color: var(--oc-gray-4);
+  border: 1px solid var(--oc-gray-2);
+}
+
+/* Sunk ship */
+
+.board .ship-sunk {
+  background-color: var(--oc-gray-8);
+  border: 1px solid var(--oc-gray-7);
 }
 
 header {

@@ -3,7 +3,8 @@ import React from 'react';
 // Creates a div with a grid that has `size` number of squares and player used for unique identification
 
 const createBoard = (size, player) => {
-  let layout = new Array(size).fill('hit');
+  let layout = new Array(size).fill('');
+
   let squares = layout.map((square, index) => <div className="square" key={index} />);
 
   return (
@@ -12,8 +13,6 @@ const createBoard = (size, player) => {
     </div>
   );
 };
-
-// playerType hardcoded as either "player" or "computer" for now
 
 export const PlayerBoard = ({ playerType }) => {
   let board = createBoard(100, playerType);

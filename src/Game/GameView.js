@@ -1,12 +1,14 @@
 import React from 'react';
+
 import { PlayerBoard } from './PlayerBoard';
 import { Ships } from './Ships';
+import { TestBoard } from './TestBoard';
 
-export const GameScreen = () => {
+export const GameView = () => {
   return (
     <section id="game-screen">
       <Ships />
-      <PlayerBoard playerType="papaya" />
+      <TestBoard />
       <PlayerBoard playerType="computer" />
     </section>
   );

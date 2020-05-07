@@ -1,10 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { GameController } from './GameController';
-import './style.css';
+import { WelcomeScreen } from './WelcomeScreen';
+import { Game } from './Game/Game.js';
+import { Header } from './Header';
+import { Footer } from './Footer';
 
-const App = () => {
-  return <GameController />;
+import './css/style.css';
+
+export const App = () => {
+  const [appState, setAppState] = useState('play');
+
+  const startPlay = () => {
+    setAppState('play');
+  };
+
+  // Renders either Welcome Screen or Game
+  return (
+    <React.Fragment>
+      <Header />
+      {appState === 'play' ? <Game /> : <WelcomeScreen startPlay={startPlay} />}
+      <Footer />
+    </React.Fragment>
+  );
 };
 
 ReactDOM.render(<App />, document.getElementById('root'));
