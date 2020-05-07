@@ -1,9 +1,10 @@
 import React from 'react';
 import { ShipReplica } from './ShipReplica';
-import { getFleet } from './getReplica';
+import { getFleet } from './getShips';
 
-export const Ships = () => {
+export const AvailableShips = () => {
   let fleet = getFleet();
+
   return (
     <div id="replica-ships">
       <h3>Available Ships</h3>

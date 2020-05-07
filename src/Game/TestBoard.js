@@ -145,9 +145,7 @@ export const TestBoard = () => {
   );
 };
 
-// Place ship
-
-const placeShip = () => {};
+const generateBoard = () => {};
 
 // Have a ship available
 // [remainingShips, setRemainingShips] = useState(['ship', 'ship', 'ship'])
