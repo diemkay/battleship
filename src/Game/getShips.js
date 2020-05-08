@@ -28,20 +28,24 @@ const availableShips = [
   },
 ];
 
-// REFACTOR TO ACCOUNT FOR SHIPS AS AN OBJECT
-
-// Takes in a ship name and returns a 'replica' ship made of small squares
-export const getReplicaShip = (shipName) => {
-  availableShips.map(ship => ship[name] === shipName => 
-
-
-// return 5 < div className = "small-square" key = {`${shipName}-replica-${index}`}/>
-
-  // return availableShips[`${shipName}`].map((item, index) => (
-  //   <div className="small-square" key={`${shipName}-replica-${index}`} />
-  // ));
+// Returns an array of ship names as strings
+export const getFleet = () => {
+  return availableShips.map((ship) => ship.name);
 };
 
-export const getFleet = () => {
-  // return availableShips.map((item) => Object.keys(item));
+export const getReplicaShip = (shipName) => {
+  let ship = availableShips.find((item) => item.name === shipName);
+
+  let shipLength = new Array(ship.length).fill('ship');
+
+  let squares = shipLength.map((item, index) => (
+    <div className="small-square" key={`${shipName}-replica-${index}`} />
+  ));
+
+  return (
+    <div id={`${shipName}-replica`} key={`${shipName}-replica`} className="replica">
+      <div className="replica-title">{shipName}</div>
+      <div className="replica-squares">{squares}</div>
+    </div>
+  );
 };

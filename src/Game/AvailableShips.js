@@ -1,17 +1,13 @@
 import React from 'react';
-import { ShipReplica } from './ShipReplica';
-import { getFleet } from './getShips';
+import { getFleet, getReplicaShip } from './getShips';
 
 export const AvailableShips = () => {
-  let fleet = getFleet();
+  let fleet = getFleet().map((item) => getReplicaShip(item));
 
   return (
-    <div id="replica-ships">
-      <h3>Available Ships</h3>
-
-      {fleet.map((ship) => (
-        <ShipReplica replicaName={`${ship}`} key={`${ship}-id`} />
-      ))}
+    <div id="available-ships">
+      <div id="available-ships-title"> Available Ships</div>
+      <div id="replica-fleet">{fleet}</div>
     </div>
   );
 };
