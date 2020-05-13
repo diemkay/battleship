@@ -1,5 +1,6 @@
-import React from 'react';
+//Takes in coordinates of a clicked square and returns its index in the array
+export const coordsToIndex = (coordinates) => {
+  const { x, y } = coordinates;
 
-//TODO: a function that takes in coordinates of a clicked square and returns its index in the layout array
-
-export const coordsToIndex = (coordinates) => {};
+  return y * 10 + x;
+};

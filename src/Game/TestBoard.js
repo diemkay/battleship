@@ -1,117 +1,37 @@
 import React from 'react';
-
-const SQUARE_STATE = {
-  empty: 'empty',
-  ship: 'ship',
-  hit: 'hit',
-  miss: 'miss',
-  ship_sunk: 'ship-sunk',
-};
-const { empty, ship, hit, miss, ship_sunk } = SQUARE_STATE;
+import { SQUARE_STATE, generateEmptyLayout, putEntityInLayout } from './layoutHelpers';
+// import { coordsToIndex } from './helpers';
 
 export const TestBoard = () => {
-  let layout = [
-    empty,
-    empty,
-    ship_sunk,
-    ship_sunk,
-    miss,
-    empty,
-    hit,
-    hit,
-    empty,
-    empty,
-    miss,
-    empty,
-    empty,
-    empty,
-    ship,
-    ship,
-    ship,
-    miss,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    miss,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    miss,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-    empty,
-  ];
+  // Initialize with empty layout
+  let layout = generateEmptyLayout();
+
+  // Hardcode a couple of things in
+  layout = putEntityInLayout(
+    layout,
+    {
+      position: { x: 3, y: 4 },
+      orientation: 'horizontal',
+      length: 4,
+    },
+    SQUARE_STATE.ship
+  );
+
+  layout = putEntityInLayout(
+    layout,
+    { position: { x: 1, y: 1 }, length: 1 },
+    SQUARE_STATE.miss
+  );
+
+  layout = putEntityInLayout(
+    layout,
+    {
+      position: { x: 3, y: 6 },
+      orientation: 'vertical',
+      length: 3,
+    },
+    SQUARE_STATE.ship
+  );
 
   const stateToClass = {
     [SQUARE_STATE.empty]: 'empty',
@@ -122,8 +42,6 @@ export const TestBoard = () => {
   };
 
   const handleMouseDown = (event) => {
-    if (event.button === 1) {
-    }
     console.log(event.button);
   };
 
@@ -144,25 +62,3 @@ export const TestBoard = () => {
     </div>
   );
 };
-
-
-
-
-
-
-// const generateBoard = () => {};
-
-// Have a ship available
-// [remainingShips, setRemainingShips] = useState(['ship', 'ship', 'ship'])
-// Current ship being placed
-// Take out of `remainingShips`
-// Put in [currentShip, setCurrentShip] = useState("ship")
-
-// Let user know which ship they are placing in some div
-// "Place your Carrier: [][][][][]"
-// Use $thing to rotate horizontally or vertically
-
-// Have buttons on mobile version
-
-// Put orientation in state: ('horizontal')
-// on mouse click right, change orientation
