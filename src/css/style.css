@@ -20,7 +20,6 @@ main {
   padding: 20px;
 }
 
-/* temp borders to figure out the screens  */
 main,
 section {
   margin: 2em;
@@ -72,6 +71,23 @@ section {
 .replica {
   align-items: center;
   justify-content: space-between;
+  background-color: var(--oc-blue-2);
+  border-radius: 2px;
+  height: 30px;
+  padding: 5px;
+  cursor: pointer;
+}
+
+.replica:hover {
+  background-color: var(--oc-blue-3);
+}
+
+.placing {
+  background-color: var(--oc-yellow-1);
+}
+
+.placing:hover {
+  background-color: var(--oc-yellow-2);
 }
 
 .replica-title {

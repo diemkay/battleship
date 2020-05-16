@@ -1,6 +1,5 @@
 import React from 'react';
 import { SQUARE_STATE, generateEmptyLayout, putEntityInLayout } from './layoutHelpers';
-// import { coordsToIndex } from './helpers';
 
 export const TestBoard = () => {
   // Initialize with empty layout
@@ -42,7 +41,7 @@ export const TestBoard = () => {
   };
 
   const handleMouseDown = (event) => {
-    console.log(event.button);
+    console.log(`Hello this is button ${event.button}`);
   };
 
   let squares = layout.map((square, index) => {

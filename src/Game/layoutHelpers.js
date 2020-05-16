@@ -9,7 +9,7 @@ export const SQUARE_STATE = {
   ship_sunk: 'ship-sunk',
 };
 
-// 1. Return empty board
+// Returns an empty board (an array)
 export const generateEmptyLayout = () => {
   return new Array(BOARD_ROWS * BOARD_COLUMNS).fill(SQUARE_STATE.empty);
 };
@@ -18,15 +18,14 @@ export const generateEmptyLayout = () => {
 export const coordsToIndex = (coordinates) => {
   const { x, y } = coordinates;
 
-  return y * 10 + x;
+  return y * BOARD_ROWS + x;
 };
 
 // Place an entity on a layout
 export const putEntityInLayout = (oldLayout, entity, type) => {
-  console.log(checkLocation(oldLayout, entityIndices(entity)));
-
   let newLayout = oldLayout.slice();
 
+  // TODO: Refactor away from here so this function only concerns itself with placement
   if (type === 'miss') {
     newLayout[coordsToIndex(entity.position)] = SQUARE_STATE.miss;
   }
