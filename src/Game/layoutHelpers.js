@@ -21,6 +21,13 @@ export const coordsToIndex = (coordinates) => {
   return y * BOARD_ROWS + x;
 };
 
+export const indexToCoords = (index) => {
+  return {
+    x: index % BOARD_ROWS,
+    y: Math.floor(index / BOARD_ROWS),
+  };
+};
+
 // Place an entity on a layout
 export const putEntityInLayout = (oldLayout, entity, type) => {
   let newLayout = oldLayout.slice();
@@ -67,8 +74,18 @@ export const entityIndices2 = (entity) => {
   return indices;
 };
 
-// Checks if the location is free. Takes in indices and returns true if all of them are free, or false if at least one isn't
+// Checks if the location is free. Takes in indices (returned by entityIndices) and returns true if all of them are free, or false if at least one isn't
 export const checkLocation = (layout, indices) =>
   indices
-    .map((index) => (layout[index] === 'empty' ? true : false))
+    .map((index) => (layout[index] === SQUARE_STATE.empty ? true : false))
     .every((item) => item === true);
+
+// If it fits, I sits
+export const isWithinBounds = (entity) => {
+  return (entity.orientation === 'vertical' &&
+    entity.position.y + entity.length <= BOARD_ROWS) ||
+    (entity.orientation === 'horizontal' &&
+      entity.position.x + entity.length <= BOARD_COLUMNS)
+    ? true
+    : false;
+};

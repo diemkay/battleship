@@ -1,8 +1,18 @@
 import React from 'react';
-import { SQUARE_STATE, generateEmptyLayout, putEntityInLayout } from './layoutHelpers';
+import {
+  SQUARE_STATE,
+  generateEmptyLayout,
+  putEntityInLayout,
+  indexToCoords,
+  entityIndices2,
+  checkLocation,
+  willItFit,
+  isWithinBounds,
+} from './layoutHelpers';
 
-export const TestBoard = () => {
+export const TestBoard = ({ currentlyPlacing, setCurrentlyPlacing }) => {
   // Initialize with empty layout
+
   let layout = generateEmptyLayout();
 
   // Hardcode a couple of things in
@@ -32,6 +42,11 @@ export const TestBoard = () => {
     SQUARE_STATE.ship
   );
 
+  if (currentlyPlacing && currentlyPlacing.position != null) {
+    console.log(isWithinBounds(currentlyPlacing));
+    layout = putEntityInLayout(layout, currentlyPlacing, SQUARE_STATE.ship);
+  }
+
   const stateToClass = {
     [SQUARE_STATE.empty]: 'empty',
     [SQUARE_STATE.ship]: 'ship',
@@ -41,7 +56,13 @@ export const TestBoard = () => {
   };
 
   const handleMouseDown = (event) => {
-    console.log(`Hello this is button ${event.button}`);
+    if (event.button === 2 && currentlyPlacing) {
+      setCurrentlyPlacing({
+        ...currentlyPlacing,
+        orientation:
+          currentlyPlacing.orientation === 'vertical' ? 'horizontal' : 'vertical',
+      });
+    }
   };
 
   let squares = layout.map((square, index) => {
@@ -49,7 +70,16 @@ export const TestBoard = () => {
       <div
         onMouseDown={handleMouseDown}
         className={`square ${stateToClass[square]}`}
-        key={`ship-${index}`}
+        key={`square-${index}`}
+        id={`square-${index}`}
+        onMouseOver={() => {
+          if (currentlyPlacing) {
+            setCurrentlyPlacing({
+              ...currentlyPlacing,
+              position: indexToCoords(index),
+            });
+          }
+        }}
       />
     );
   });

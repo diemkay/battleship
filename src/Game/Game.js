@@ -38,9 +38,11 @@ export const Game = () => {
     let shipIdx = availableShips.findIndex((ship) => ship.name === shipName);
     const shipToPlace = availableShips[shipIdx];
 
-    setCurrentlyPlacing({ ...shipToPlace, orientation: 'horizontal', postion: null });
+    setCurrentlyPlacing({ ...shipToPlace, orientation: 'horizontal', position: null });
+  };
 
-    console.log(currentlyPlacing);
+  const handleMouseOver = (event) => {
+    console.log('Hi sailor!');
   };
 
   return (
@@ -48,6 +50,7 @@ export const Game = () => {
       availableShips={availableShips}
       selectShip={selectShip}
       currentlyPlacing={currentlyPlacing}
+      setCurrentlyPlacing={setCurrentlyPlacing}
     />
   );
 };
