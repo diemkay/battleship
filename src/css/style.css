@@ -173,8 +173,22 @@ section {
 /* Sunk ship */
 
 .board .ship-sunk {
-  background-color: var(--oc-gray-8);
-  border: 1px solid var(--oc-gray-7);
+  background-color: var(--oc-gray-9);
+  border: 1px solid var(--oc-gray-8);
+}
+
+/* Forbidden square  */
+
+.board .forbidden {
+  background-color: var(--oc-red-2);
+  border: 1px solid var(--oc-red-3);
+}
+
+/* Awaiting placement  */
+
+.board .awaiting {
+  background-color: var(--oc-blue-2);
+  border: 1px solid var(--oc-blue-3);
 }
 
 header {

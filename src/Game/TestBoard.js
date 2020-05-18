@@ -4,13 +4,11 @@ import {
   generateEmptyLayout,
   putEntityInLayout,
   indexToCoords,
-  entityIndices2,
-  checkLocation,
-  willItFit,
   isWithinBounds,
+  calculateOverhang,
 } from './layoutHelpers';
 
-export const TestBoard = ({ currentlyPlacing, setCurrentlyPlacing }) => {
+export const TestBoard = ({ currentlyPlacing, setCurrentlyPlacing, handleMouseDown }) => {
   // Initialize with empty layout
 
   let layout = generateEmptyLayout();
@@ -43,8 +41,15 @@ export const TestBoard = ({ currentlyPlacing, setCurrentlyPlacing }) => {
   );
 
   if (currentlyPlacing && currentlyPlacing.position != null) {
-    console.log(isWithinBounds(currentlyPlacing));
-    layout = putEntityInLayout(layout, currentlyPlacing, SQUARE_STATE.ship);
+    if (isWithinBounds(currentlyPlacing)) {
+      layout = putEntityInLayout(layout, currentlyPlacing, SQUARE_STATE.ship);
+    } else {
+      let forbiddenShip = {
+        ...currentlyPlacing,
+        length: currentlyPlacing.length - calculateOverhang(currentlyPlacing),
+      };
+      layout = putEntityInLayout(layout, forbiddenShip, SQUARE_STATE.forbidden);
+    }
   }
 
   const stateToClass = {
@@ -53,16 +58,8 @@ export const TestBoard = ({ currentlyPlacing, setCurrentlyPlacing }) => {
     [SQUARE_STATE.hit]: 'hit',
     [SQUARE_STATE.miss]: 'miss',
     [SQUARE_STATE.ship_sunk]: 'ship-sunk',
-  };
-
-  const handleMouseDown = (event) => {
-    if (event.button === 2 && currentlyPlacing) {
-      setCurrentlyPlacing({
-        ...currentlyPlacing,
-        orientation:
-          currentlyPlacing.orientation === 'vertical' ? 'horizontal' : 'vertical',
-      });
-    }
+    [SQUARE_STATE.forbidden]: 'forbidden',
+    [SQUARE_STATE.awaiting]: 'awaiting',
   };
 
   let squares = layout.map((square, index) => {

@@ -7,6 +7,8 @@ export const SQUARE_STATE = {
   hit: 'hit',
   miss: 'miss',
   ship_sunk: 'ship-sunk',
+  forbidden: 'forbidden',
+  awaiting: 'awaiting',
 };
 
 // Returns an empty board (an array)
@@ -33,13 +35,19 @@ export const putEntityInLayout = (oldLayout, entity, type) => {
   let newLayout = oldLayout.slice();
 
   // TODO: Refactor away from here so this function only concerns itself with placement
-  if (type === 'miss') {
-    newLayout[coordsToIndex(entity.position)] = SQUARE_STATE.miss;
-  }
+  // if (type === 'miss') {
+  //   newLayout[coordsToIndex(entity.position)] = SQUARE_STATE.miss;
+  // }
 
   if (type === 'ship') {
     entityIndices(entity).forEach((idx) => {
-      newLayout[idx] = SQUARE_STATE.ship;
+      newLayout[idx] = SQUARE_STATE.awaiting;
+    });
+  }
+
+  if (type === 'forbidden') {
+    entityIndices(entity).forEach((idx) => {
+      newLayout[idx] = SQUARE_STATE.forbidden;
     });
   }
 
@@ -82,10 +90,15 @@ export const checkLocation = (layout, indices) =>
 
 // If it fits, I sits
 export const isWithinBounds = (entity) => {
-  return (entity.orientation === 'vertical' &&
-    entity.position.y + entity.length <= BOARD_ROWS) ||
+  return (
+    (entity.orientation === 'vertical' &&
+      entity.position.y + entity.length <= BOARD_ROWS) ||
     (entity.orientation === 'horizontal' &&
       entity.position.x + entity.length <= BOARD_COLUMNS)
-    ? true
-    : false;
+  );
 };
+
+export const calculateOverhang = (entity) =>
+  entity.orientation === 'vertical'
+    ? entity.position.y + entity.length - BOARD_ROWS
+    : entity.position.x + entity.length - BOARD_COLUMNS;

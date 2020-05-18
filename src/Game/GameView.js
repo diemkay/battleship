@@ -3,13 +3,13 @@ import React from 'react';
 import { PlayerBoard } from './PlayerBoard';
 import { PlayerFleet } from './PlayerFleet';
 import { TestBoard } from './TestBoard';
-import { TipBox } from './TipBox';
 
 export const GameView = ({
   availableShips,
   selectShip,
   currentlyPlacing,
   setCurrentlyPlacing,
+  handleMouseDown,
 }) => {
   return (
     <section id="game-screen">
@@ -22,6 +22,7 @@ export const GameView = ({
       <TestBoard
         currentlyPlacing={currentlyPlacing}
         setCurrentlyPlacing={setCurrentlyPlacing}
+        handleMouseDown={handleMouseDown}
       />
       <PlayerBoard playerType="computer" />
       {/* <TipBox /> */}

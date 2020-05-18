@@ -41,8 +41,14 @@ export const Game = () => {
     setCurrentlyPlacing({ ...shipToPlace, orientation: 'horizontal', position: null });
   };
 
-  const handleMouseOver = (event) => {
-    console.log('Hi sailor!');
+  const handleMouseDown = (event) => {
+    if (event.button === 2 && currentlyPlacing) {
+      setCurrentlyPlacing({
+        ...currentlyPlacing,
+        orientation:
+          currentlyPlacing.orientation === 'vertical' ? 'horizontal' : 'vertical',
+      });
+    }
   };
 
   return (
@@ -51,6 +57,7 @@ export const Game = () => {
       selectShip={selectShip}
       currentlyPlacing={currentlyPlacing}
       setCurrentlyPlacing={setCurrentlyPlacing}
+      handleMouseDown={handleMouseDown}
     />
   );
 };
