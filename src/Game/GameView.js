@@ -9,7 +9,9 @@ export const GameView = ({
   selectShip,
   currentlyPlacing,
   setCurrentlyPlacing,
-  handleMouseDown,
+  rotateShip,
+  placeShip,
+  placedShips,
 }) => {
   return (
     <section id="game-screen">
@@ -22,7 +24,9 @@ export const GameView = ({
       <TestBoard
         currentlyPlacing={currentlyPlacing}
         setCurrentlyPlacing={setCurrentlyPlacing}
-        handleMouseDown={handleMouseDown}
+        rotateShip={rotateShip}
+        placeShip={placeShip}
+        placedShips={placedShips}
       />
       <PlayerBoard playerType="computer" />
       {/* <TipBox /> */}

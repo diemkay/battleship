@@ -16,6 +16,7 @@ export const PlayerFleet = ({ availableShips, selectShip, currentlyPlacing }) =>
     />
   ));
 
+  // TODO: Have an empty state that says, e.g. "you have placed all your ships"
   return (
     <div id="available-ships">
       <div id="available-ships-title"> Your Ships</div>

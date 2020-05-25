@@ -8,36 +8,17 @@ import {
   calculateOverhang,
 } from './layoutHelpers';
 
-export const TestBoard = ({ currentlyPlacing, setCurrentlyPlacing, handleMouseDown }) => {
-  // Initialize with empty layout
-
-  let layout = generateEmptyLayout();
-
-  // Hardcode a couple of things in
-  layout = putEntityInLayout(
-    layout,
-    {
-      position: { x: 3, y: 4 },
-      orientation: 'horizontal',
-      length: 4,
-    },
-    SQUARE_STATE.ship
-  );
-
-  layout = putEntityInLayout(
-    layout,
-    { position: { x: 1, y: 1 }, length: 1 },
-    SQUARE_STATE.miss
-  );
-
-  layout = putEntityInLayout(
-    layout,
-    {
-      position: { x: 3, y: 6 },
-      orientation: 'vertical',
-      length: 3,
-    },
-    SQUARE_STATE.ship
+export const TestBoard = ({
+  currentlyPlacing,
+  setCurrentlyPlacing,
+  rotateShip,
+  placeShip,
+  placedShips,
+}) => {
+  let layout = placedShips.reduce(
+    (prevLayout, currentShip) =>
+      putEntityInLayout(prevLayout, currentShip, SQUARE_STATE.ship),
+    generateEmptyLayout()
   );
 
   if (currentlyPlacing && currentlyPlacing.position != null) {
@@ -65,7 +46,12 @@ export const TestBoard = ({ currentlyPlacing, setCurrentlyPlacing, handleMouseDo
   let squares = layout.map((square, index) => {
     return (
       <div
-        onMouseDown={handleMouseDown}
+        onMouseDown={rotateShip}
+        onClick={() => {
+          if (currentlyPlacing) {
+            placeShip(currentlyPlacing);
+          }
+        }}
         className={`square ${stateToClass[square]}`}
         key={`square-${index}`}
         id={`square-${index}`}

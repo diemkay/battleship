@@ -11,7 +11,7 @@ export const SQUARE_STATE = {
   awaiting: 'awaiting',
 };
 
-// Returns an empty board (an array)
+// Returns an empty board
 export const generateEmptyLayout = () => {
   return new Array(BOARD_ROWS * BOARD_COLUMNS).fill(SQUARE_STATE.empty);
 };
@@ -82,11 +82,13 @@ export const entityIndices2 = (entity) => {
   return indices;
 };
 
-// Checks if the location is free. Takes in indices (returned by entityIndices) and returns true if all of them are free, or false if at least one isn't
-export const checkLocation = (layout, indices) =>
-  indices
-    .map((index) => (layout[index] === SQUARE_STATE.empty ? true : false))
-    .every((item) => item === true);
+// // Checks if the location is free. Takes in indices (returned by entityIndices) and returns true if all of them are free, or false if at least one isn't
+// export const checkLocation = (layout, entity) => {
+//   let indices = entityIndices2(entity);
+//   indices
+//     .map((index) => (layout[index] === SQUARE_STATE.empty ? true : false))
+//     .every((item) => item === true);
+// };
 
 // If it fits, I sits
 export const isWithinBounds = (entity) => {
@@ -102,3 +104,7 @@ export const calculateOverhang = (entity) =>
   entity.orientation === 'vertical'
     ? entity.position.y + entity.length - BOARD_ROWS
     : entity.position.x + entity.length - BOARD_COLUMNS;
+
+// export const canBePlaced = (entity, layout) => {
+//   return isWithinBounds(entity) && checkLocation(layout, entity);
+// };
