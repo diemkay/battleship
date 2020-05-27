@@ -50,6 +50,7 @@ section {
   align-self: center;
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
   padding: 10px;
 }
@@ -100,6 +101,12 @@ section {
   height: 10px;
   border: 1px solid var(--oc-blue-2);
   background-color: var(--oc-blue-9);
+}
+
+#play-ready {
+  margin: 10px;
+  font-family: 'Raleway';
+  text-transform: none;
 }
 
 /* TODO: FIX THIS SCREEN SO THINGS FIT NICELY!!!  */
@@ -229,8 +236,9 @@ p {
 button {
   width: 75px;
   height: 50px;
-  font-size: 16px;
-  border-radius: 20px;
+  font-size: 14px;
+  border-radius: 1px;
+  margin: 10px;
   border: none;
   background-color: var(--oc-red-7);
   color: var(--oc-gray-1);

@@ -4,8 +4,8 @@ import {
   generateEmptyLayout,
   putEntityInLayout,
   indexToCoords,
-  isWithinBounds,
   calculateOverhang,
+  canBePlaced,
 } from './layoutHelpers';
 
 export const TestBoard = ({
@@ -21,8 +21,11 @@ export const TestBoard = ({
     generateEmptyLayout()
   );
 
-  if (currentlyPlacing && currentlyPlacing.position != null) {
-    if (isWithinBounds(currentlyPlacing)) {
+  const isPlacingOverBoard = currentlyPlacing && currentlyPlacing.position != null;
+  const canPlaceCurrentShip = isPlacingOverBoard && canBePlaced(currentlyPlacing, layout);
+
+  if (isPlacingOverBoard) {
+    if (canPlaceCurrentShip) {
       layout = putEntityInLayout(layout, currentlyPlacing, SQUARE_STATE.ship);
     } else {
       let forbiddenShip = {
@@ -48,7 +51,7 @@ export const TestBoard = ({
       <div
         onMouseDown={rotateShip}
         onClick={() => {
-          if (currentlyPlacing) {
+          if (canPlaceCurrentShip) {
             placeShip(currentlyPlacing);
           }
         }}

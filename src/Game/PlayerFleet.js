@@ -1,7 +1,12 @@
 import React from 'react';
 import { ReplicaBox } from './ReplicaBox';
 
-export const PlayerFleet = ({ availableShips, selectShip, currentlyPlacing }) => {
+export const PlayerFleet = ({
+  availableShips,
+  selectShip,
+  currentlyPlacing,
+  startTurn,
+}) => {
   // An array of available ships left as strings
   let shipsLeft = availableShips.map((ship) => ship.name);
 
@@ -16,11 +21,21 @@ export const PlayerFleet = ({ availableShips, selectShip, currentlyPlacing }) =>
     />
   ));
 
-  // TODO: Have an empty state that says, e.g. "you have placed all your ships"
+  let fleet = <div id="replica-fleet">{shipReplicaBoxes}</div>;
+
+  let playButton = (
+    <div id="play-ready">
+      <p>Ships are in formation.</p>
+      <button id="play-button" onClick={startTurn}>
+        Start game
+      </button>
+    </div>
+  );
+
   return (
     <div id="available-ships">
       <div id="available-ships-title"> Your Ships</div>
-      <div id="replica-fleet">{shipReplicaBoxes}</div>
+      {availableShips.length > 0 ? fleet : playButton}
     </div>
   );
 };

@@ -8,7 +8,7 @@ import { Footer } from './Footer';
 import './css/style.css';
 
 export const App = () => {
-  const [appState, setAppState] = useState('play');
+  const [appState, setAppState] = useState('play'); // play or welcome
 
   const startPlay = () => {
     setAppState('play');

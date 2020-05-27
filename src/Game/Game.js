@@ -35,6 +35,8 @@ export const Game = () => {
   const [placedShips, setPlacedShips] = useState([]);
   const [availableShips, setAvailableShips] = useState(AVAILABLE_SHIPS);
 
+  const startTurn = () => setGameState('player-turn');
+
   const selectShip = (shipName) => {
     let shipIdx = availableShips.findIndex((ship) => ship.name === shipName);
     const shipToPlace = availableShips[shipIdx];
@@ -81,6 +83,7 @@ export const Game = () => {
       rotateShip={rotateShip}
       placeShip={placeShip}
       placedShips={placedShips}
+      startTurn={startTurn}
     />
   );
 };

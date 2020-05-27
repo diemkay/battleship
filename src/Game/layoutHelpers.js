@@ -41,7 +41,7 @@ export const putEntityInLayout = (oldLayout, entity, type) => {
 
   if (type === 'ship') {
     entityIndices(entity).forEach((idx) => {
-      newLayout[idx] = SQUARE_STATE.awaiting;
+      newLayout[idx] = SQUARE_STATE.ship;
     });
   }
 
@@ -82,15 +82,7 @@ export const entityIndices2 = (entity) => {
   return indices;
 };
 
-// // Checks if the location is free. Takes in indices (returned by entityIndices) and returns true if all of them are free, or false if at least one isn't
-// export const checkLocation = (layout, entity) => {
-//   let indices = entityIndices2(entity);
-//   indices
-//     .map((index) => (layout[index] === SQUARE_STATE.empty ? true : false))
-//     .every((item) => item === true);
-// };
-
-// If it fits, I sits
+// If it fits, I sits. Checks the ship doesn't overflow
 export const isWithinBounds = (entity) => {
   return (
     (entity.orientation === 'vertical' &&
@@ -100,11 +92,23 @@ export const isWithinBounds = (entity) => {
   );
 };
 
-export const calculateOverhang = (entity) =>
-  entity.orientation === 'vertical'
-    ? entity.position.y + entity.length - BOARD_ROWS
-    : entity.position.x + entity.length - BOARD_COLUMNS;
+// Check that the indices of the ship currently being placed all correspond to empty squares
+export const isPlaceFree = (entity, layout) => {
+  let shipIndices = entityIndices2(entity);
 
-// export const canBePlaced = (entity, layout) => {
-//   return isWithinBounds(entity) && checkLocation(layout, entity);
-// };
+  return shipIndices.every((idx) => layout[idx] === SQUARE_STATE.empty);
+};
+
+// Used during placement to calculate how many squares a ship is out of bounds, so that the remaining squares on the board turn red
+export const calculateOverhang = (entity) =>
+  Math.max(
+    entity.orientation === 'vertical'
+      ? entity.position.y + entity.length - BOARD_ROWS
+      : entity.position.x + entity.length - BOARD_COLUMNS,
+    0
+  );
+
+// Checks if the ship you're trying to place is within bounds and the space is free. Both need to return true
+
+export const canBePlaced = (entity, layout) =>
+  isWithinBounds(entity) && isPlaceFree(entity, layout);
