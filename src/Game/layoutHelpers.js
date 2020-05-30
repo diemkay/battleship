@@ -11,6 +11,16 @@ export const SQUARE_STATE = {
   awaiting: 'awaiting',
 };
 
+export const stateToClass = {
+  [SQUARE_STATE.empty]: 'empty',
+  [SQUARE_STATE.ship]: 'ship',
+  [SQUARE_STATE.hit]: 'hit',
+  [SQUARE_STATE.miss]: 'miss',
+  [SQUARE_STATE.ship_sunk]: 'ship-sunk',
+  [SQUARE_STATE.forbidden]: 'forbidden',
+  [SQUARE_STATE.awaiting]: 'awaiting',
+};
+
 // Returns an empty board
 export const generateEmptyLayout = () => {
   return new Array(BOARD_ROWS * BOARD_COLUMNS).fill(SQUARE_STATE.empty);

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { GameView } from './GameView';
+import { placeAllComputerShips } from './gameHelpers';
 
 const AVAILABLE_SHIPS = [
   {
@@ -34,8 +35,13 @@ export const Game = () => {
   const [currentlyPlacing, setCurrentlyPlacing] = useState(null);
   const [placedShips, setPlacedShips] = useState([]);
   const [availableShips, setAvailableShips] = useState(AVAILABLE_SHIPS);
+  const [computerShips, setComputerShips] = useState([]);
 
-  const startTurn = () => setGameState('player-turn');
+  const startTurn = () => {
+    console.log('HAI');
+    generateComputerShips();
+    setGameState('player-turn');
+  };
 
   const selectShip = (shipName) => {
     let shipIdx = availableShips.findIndex((ship) => ship.name === shipName);
@@ -64,6 +70,11 @@ export const Game = () => {
     setCurrentlyPlacing(null);
   };
 
+  const generateComputerShips = () => {
+    let placedComputerShips = placeAllComputerShips(AVAILABLE_SHIPS.slice());
+    setComputerShips(placedComputerShips);
+  };
+
   const rotateShip = (event) => {
     if (currentlyPlacing != null && event.button === 2) {
       setCurrentlyPlacing({
@@ -84,6 +95,7 @@ export const Game = () => {
       placeShip={placeShip}
       placedShips={placedShips}
       startTurn={startTurn}
+      computerShips={computerShips}
     />
   );
 };

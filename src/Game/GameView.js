@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { PlayerBoard } from './PlayerBoard';
 import { PlayerFleet } from './PlayerFleet';
 import { TestBoard } from './TestBoard';
+import { ComputerBoard } from './ComputerBoard';
 
 export const GameView = ({
   availableShips,
@@ -13,6 +13,7 @@ export const GameView = ({
   placeShip,
   placedShips,
   startTurn,
+  computerShips,
 }) => {
   return (
     <section id="game-screen">
@@ -20,6 +21,7 @@ export const GameView = ({
         availableShips={availableShips}
         selectShip={selectShip}
         currentlyPlacing={currentlyPlacing}
+        startTurn={startTurn}
       />
 
       <TestBoard
@@ -28,9 +30,8 @@ export const GameView = ({
         rotateShip={rotateShip}
         placeShip={placeShip}
         placedShips={placedShips}
-        startTurn={startTurn}
       />
-      <PlayerBoard playerType="computer" />
+      <ComputerBoard computerShips={computerShips} />
       {/* <TipBox /> */}
     </section>
   );

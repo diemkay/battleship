@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   SQUARE_STATE,
+  stateToClass,
   generateEmptyLayout,
   putEntityInLayout,
   indexToCoords,
@@ -35,16 +36,6 @@ export const TestBoard = ({
       layout = putEntityInLayout(layout, forbiddenShip, SQUARE_STATE.forbidden);
     }
   }
-
-  const stateToClass = {
-    [SQUARE_STATE.empty]: 'empty',
-    [SQUARE_STATE.ship]: 'ship',
-    [SQUARE_STATE.hit]: 'hit',
-    [SQUARE_STATE.miss]: 'miss',
-    [SQUARE_STATE.ship_sunk]: 'ship-sunk',
-    [SQUARE_STATE.forbidden]: 'forbidden',
-    [SQUARE_STATE.awaiting]: 'awaiting',
-  };
 
   let squares = layout.map((square, index) => {
     return (
