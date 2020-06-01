@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { GameView } from './GameView';
-import { placeAllComputerShips } from './gameHelpers';
+import { placeAllComputerShips } from './layoutHelpers';
 
 const AVAILABLE_SHIPS = [
   {
@@ -32,17 +32,14 @@ const AVAILABLE_SHIPS = [
 
 export const Game = () => {
   const [gameState, setGameState] = useState('placement');
+  // placement, player-turn, computer-turn, game-end (?)
+
   const [currentlyPlacing, setCurrentlyPlacing] = useState(null);
   const [placedShips, setPlacedShips] = useState([]);
   const [availableShips, setAvailableShips] = useState(AVAILABLE_SHIPS);
   const [computerShips, setComputerShips] = useState([]);
 
-  const startTurn = () => {
-    console.log('HAI');
-    generateComputerShips();
-    setGameState('player-turn');
-  };
-
+  // Player-related actions
   const selectShip = (shipName) => {
     let shipIdx = availableShips.findIndex((ship) => ship.name === shipName);
     const shipToPlace = availableShips[shipIdx];
@@ -70,11 +67,6 @@ export const Game = () => {
     setCurrentlyPlacing(null);
   };
 
-  const generateComputerShips = () => {
-    let placedComputerShips = placeAllComputerShips(AVAILABLE_SHIPS.slice());
-    setComputerShips(placedComputerShips);
-  };
-
   const rotateShip = (event) => {
     if (currentlyPlacing != null && event.button === 2) {
       setCurrentlyPlacing({
@@ -83,6 +75,18 @@ export const Game = () => {
           currentlyPlacing.orientation === 'vertical' ? 'horizontal' : 'vertical',
       });
     }
+  };
+
+  const startTurn = () => {
+    console.log('HAI');
+    generateComputerShips();
+    setGameState('player-turn');
+  };
+
+  // Computer-related things
+  const generateComputerShips = () => {
+    let placedComputerShips = placeAllComputerShips(AVAILABLE_SHIPS.slice());
+    setComputerShips(placedComputerShips);
   };
 
   return (
@@ -96,6 +100,7 @@ export const Game = () => {
       placedShips={placedShips}
       startTurn={startTurn}
       computerShips={computerShips}
+      gameState={gameState}
     />
   );
 };

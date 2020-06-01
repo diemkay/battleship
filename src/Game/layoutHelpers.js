@@ -26,7 +26,7 @@ export const generateEmptyLayout = () => {
   return new Array(BOARD_ROWS * BOARD_COLUMNS).fill(SQUARE_STATE.empty);
 };
 
-// Returns the index of a clicked square from coordinates
+// Returns the index of a clicked square from coordinates and viceversa
 export const coordsToIndex = (coordinates) => {
   const { x, y } = coordinates;
 
@@ -39,31 +39,6 @@ export const indexToCoords = (index) => {
     y: Math.floor(index / BOARD_ROWS),
   };
 };
-
-// Place an entity on a layout
-export const putEntityInLayout = (oldLayout, entity, type) => {
-  let newLayout = oldLayout.slice();
-
-  // TODO: Refactor away from here so this function only concerns itself with placement
-  // if (type === 'miss') {
-  //   newLayout[coordsToIndex(entity.position)] = SQUARE_STATE.miss;
-  // }
-
-  if (type === 'ship') {
-    entityIndices(entity).forEach((idx) => {
-      newLayout[idx] = SQUARE_STATE.ship;
-    });
-  }
-
-  if (type === 'forbidden') {
-    entityIndices(entity).forEach((idx) => {
-      newLayout[idx] = SQUARE_STATE.forbidden;
-    });
-  }
-
-  return newLayout;
-};
-
 // Returns the indices that entity would take up
 export const entityIndices = (entity) => {
   let position = coordsToIndex(entity.position);
@@ -102,6 +77,25 @@ export const isWithinBounds = (entity) => {
   );
 };
 
+// Place an entity on a layout
+export const putEntityInLayout = (oldLayout, entity, type) => {
+  let newLayout = oldLayout.slice();
+
+  if (type === 'ship') {
+    entityIndices(entity).forEach((idx) => {
+      newLayout[idx] = SQUARE_STATE.ship;
+    });
+  }
+
+  if (type === 'forbidden') {
+    entityIndices(entity).forEach((idx) => {
+      newLayout[idx] = SQUARE_STATE.forbidden;
+    });
+  }
+
+  return newLayout;
+};
+
 // Check that the indices of the ship currently being placed all correspond to empty squares
 export const isPlaceFree = (entity, layout) => {
   let shipIndices = entityIndices2(entity);
@@ -119,6 +113,65 @@ export const calculateOverhang = (entity) =>
   );
 
 // Checks if the ship you're trying to place is within bounds and the space is free. Both need to return true
-
 export const canBePlaced = (entity, layout) =>
   isWithinBounds(entity) && isPlaceFree(entity, layout);
+
+// Generates layout and assigns each comp ship a random orientation and set of coordinates; returns all placed ships
+export const placeAllComputerShips = (computerShips) => {
+  let compLayout = generateEmptyLayout();
+
+  return computerShips.map((ship) => {
+    while (true) {
+      let decoratedShip = randomizeShipProps(ship);
+
+      if (canBePlaced(decoratedShip, compLayout)) {
+        compLayout = putEntityInLayout(compLayout, decoratedShip, SQUARE_STATE.ship);
+        return { ...decoratedShip, placed: true };
+      }
+    }
+  });
+};
+
+// Generate a random orientation and starting index on board for computer ships
+export const generateRandomOrientation = () => {
+  let randomNumber = Math.floor(Math.random() * Math.floor(2));
+
+  return randomNumber === 1 ? 'vertical' : 'horizontal';
+};
+
+export const generateRandomIndex = () => {
+  return Math.floor(Math.random() * Math.floor(BOARD_COLUMNS * BOARD_ROWS));
+};
+
+// Assign a ship a random orientation and set of coordinates
+export const randomizeShipProps = (ship) => {
+  let randomStartIndex = generateRandomIndex();
+
+  return {
+    ...ship,
+    position: indexToCoords(randomStartIndex),
+    orientation: generateRandomOrientation(),
+  };
+};
+
+// Place the computer ship in the layout
+export const placeCompShipInLayout = (ship, compLayout) => {
+  let newCompLayout = compLayout.slice();
+
+  entityIndices2(ship).forEach((idx) => {
+    newCompLayout[idx] = SQUARE_STATE.ship;
+  });
+  return newCompLayout;
+};
+
+// TODO: FIRE TORPEDO
+
+// An onclick handler for a square div
+// Whose turn is it? should be hanled elsewhere and fireTorpedo should be dumb
+
+// should check the state of the square in layout to see if it's empty, a ship, or already
+
+// find array[index of square hit]
+
+//TODO: Player Turn visual cues
+// Click button

@@ -1,6 +1,7 @@
 @import './open-color.css';
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap');
+
 @import url('https://fonts.googleapis.com/css2?family=PT+Serif&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lexend+Deca&family=Lexend+Tera&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Raleway&display=swap');
 
 body {
@@ -43,7 +44,7 @@ section {
   background-color: var(--oc-gray-1);
   border: 2px solid var(--oc-red-5);
   color: var(--oc-gray-8);
-  font-family: 'Raleway';
+  font-family: 'Lexend Tera', sans-serif;
   text-transform: uppercase;
   text-align: center;
   font-size: 18px;
@@ -53,6 +54,20 @@ section {
   align-items: center;
   justify-content: center;
   padding: 10px;
+}
+
+#player-tips {
+  width: 200px;
+  height: 300px;
+  max-height: 400px;
+  border: 2px solid var(--oc-red-5);
+  font-family: 'Lexend Tera', sans-serif;
+  text-transform: uppercase;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
 }
 
 #replica-fleet {
@@ -214,7 +229,7 @@ p {
 
 h1,
 h2 {
-  font-family: 'Oswald';
+  font-family: 'Lexend Tera', sans-serif;
   text-transform: uppercase;
 }
 
@@ -228,13 +243,13 @@ h2 {
 }
 
 p {
-  font-family: 'PT Serif', serif;
+  font-family: 'Lexend Deca', sans-serif;
   font-size: 16px;
   line-height: 1.5;
 }
 
 button {
-  width: 75px;
+  width: 170px;
   height: 50px;
   font-size: 14px;
   border-radius: 1px;
@@ -242,7 +257,7 @@ button {
   border: none;
   background-color: var(--oc-red-7);
   color: var(--oc-gray-1);
-  font-family: 'Raleway';
+  font-family: 'Lexend Deca', sans-serif;
   text-transform: uppercase;
   font-weight: 400;
 }
@@ -255,8 +270,19 @@ button:active {
   top: 1px;
 }
 
-footer {
+footer,
+footer a {
   margin-top: 20px;
+  color: var(--oc-gray-6);
   text-align: center;
-  font-family: 'PT Serif';
+  text-decoration: none;
+  font-family: 'Lexend Deca', sans-serif;
+}
+
+footer a:hover {
+  color: var(--oc-red-8);
+}
+
+footer a:visited {
+  color: var(--oc-blue-5);
 }
