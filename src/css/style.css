@@ -38,7 +38,8 @@ section {
   }
 }
 
-#available-ships {
+#available-ships,
+#player-tips {
   width: 200px;
   max-height: 400px;
   background-color: var(--oc-gray-1);
@@ -56,7 +57,7 @@ section {
   padding: 10px;
 }
 
-#player-tips {
+/* #player-tips {
   width: 200px;
   height: 300px;
   max-height: 400px;
@@ -68,6 +69,10 @@ section {
   align-items: center;
   justify-content: center;
   font-size: 18px;
+} */
+
+.player-tip {
+  text-transform: none;
 }
 
 #replica-fleet {
