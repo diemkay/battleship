@@ -1,26 +1,77 @@
 import React from 'react';
+import {
+  SQUARE_STATE,
+  stateToClass,
+  generateEmptyLayout,
+  putEntityInLayout,
+  indexToCoords,
+  calculateOverhang,
+  canBePlaced,
+} from './layoutHelpers';
 
-// Creates a div with a grid that has `size` number of squares and player used for unique identification
-
-const createBoard = (size, player) => {
-  let layout = new Array(size).fill('');
-
-  let squares = layout.map((square, index) => <div className="square" key={index} />);
-
-  return (
-    <div id={`${player}-board`} className="board">
-      {squares}
-    </div>
+export const PlayerBoard = ({
+  currentlyPlacing,
+  setCurrentlyPlacing,
+  rotateShip,
+  placeShip,
+  placedShips,
+  hitsByComputer,
+}) => {
+  let layout = placedShips.reduce(
+    (prevLayout, currentShip) =>
+      putEntityInLayout(prevLayout, currentShip, SQUARE_STATE.ship),
+    generateEmptyLayout()
   );
-};
 
-export const PlayerBoard = ({ playerType }) => {
-  let board = createBoard(100, playerType);
+  layout = hitsByComputer.reduce(
+    (prevLayout, currentHit) =>
+      putEntityInLayout(prevLayout, currentHit, currentHit.type),
+    layout
+  );
+
+  const isPlacingOverBoard = currentlyPlacing && currentlyPlacing.position != null;
+  const canPlaceCurrentShip = isPlacingOverBoard && canBePlaced(currentlyPlacing, layout);
+
+  if (isPlacingOverBoard) {
+    if (canPlaceCurrentShip) {
+      layout = putEntityInLayout(layout, currentlyPlacing, SQUARE_STATE.ship);
+    } else {
+      let forbiddenShip = {
+        ...currentlyPlacing,
+        length: currentlyPlacing.length - calculateOverhang(currentlyPlacing),
+      };
+      layout = putEntityInLayout(layout, forbiddenShip, SQUARE_STATE.forbidden);
+    }
+  }
+
+  let squares = layout.map((square, index) => {
+    return (
+      <div
+        onMouseDown={rotateShip}
+        onClick={() => {
+          if (canPlaceCurrentShip) {
+            placeShip(currentlyPlacing);
+          }
+        }}
+        className={`square ${stateToClass[square]}`}
+        key={`square-${index}`}
+        id={`square-${index}`}
+        onMouseOver={() => {
+          if (currentlyPlacing) {
+            setCurrentlyPlacing({
+              ...currentlyPlacing,
+              position: indexToCoords(index),
+            });
+          }
+        }}
+      />
+    );
+  });
 
   return (
     <div>
-      <h2 className="player-title">{`${playerType}`}</h2>
-      {board}
+      <h2 className="player-title">You</h2>
+      <div className="board">{squares}</div>
     </div>
   );
 };

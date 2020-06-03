@@ -45,7 +45,7 @@ section {
   background-color: var(--oc-gray-1);
   border: 2px solid var(--oc-red-5);
   color: var(--oc-gray-8);
-  font-family: 'Lexend Tera', sans-serif;
+  font-family: 'Lexend Deca', sans-serif;
   text-transform: uppercase;
   text-align: center;
   font-size: 18px;
@@ -73,6 +73,7 @@ section {
 
 .player-tip {
   text-transform: none;
+  color: var(--oc-gray-8);
 }
 
 #replica-fleet {

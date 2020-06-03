@@ -1,5 +1,6 @@
 export const BOARD_ROWS = 10;
 export const BOARD_COLUMNS = 10;
+export const BOARD = BOARD_COLUMNS * BOARD_ROWS;
 
 export const SQUARE_STATE = {
   empty: 'empty',
@@ -147,8 +148,8 @@ export const generateRandomOrientation = () => {
   return randomNumber === 1 ? 'vertical' : 'horizontal';
 };
 
-export const generateRandomIndex = () => {
-  return Math.floor(Math.random() * Math.floor(BOARD_COLUMNS * BOARD_ROWS));
+export const generateRandomIndex = (value = BOARD) => {
+  return Math.floor(Math.random() * Math.floor(value));
 };
 
 // Assign a ship a random orientation and set of coordinates

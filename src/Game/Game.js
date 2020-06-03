@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import { GameView } from './GameView';
-import { placeAllComputerShips, indexToCoords } from './layoutHelpers';
+import {
+  placeAllComputerShips,
+  SQUARE_STATE,
+  indexToCoords,
+  putEntityInLayout,
+  generateEmptyLayout,
+  generateRandomIndex,
+} from './layoutHelpers';
 
 const AVAILABLE_SHIPS = [
   {
@@ -32,13 +39,14 @@ const AVAILABLE_SHIPS = [
 
 export const Game = () => {
   const [gameState, setGameState] = useState('placement');
-  // placement, player-turn, computer-turn, game-end (?)
+  // placement, player-turn, computer-turn, game-over (?)
 
   const [currentlyPlacing, setCurrentlyPlacing] = useState(null);
   const [placedShips, setPlacedShips] = useState([]);
   const [availableShips, setAvailableShips] = useState(AVAILABLE_SHIPS);
   const [computerShips, setComputerShips] = useState([]);
   const [hitsByPlayer, setHitsByPlayer] = useState([]);
+  const [hitsByComputer, setHitsByComputer] = useState([]);
 
   // Player-related actions
   const selectShip = (shipName) => {
@@ -84,9 +92,9 @@ export const Game = () => {
   };
 
   const changeTurn = () => {
-    gameState === 'player-turn'
-      ? setGameState('computer-turn')
-      : setGameState('player-turn');
+    setGameState((oldGameState) =>
+      oldGameState === 'player-turn' ? 'computer-turn' : 'player-turn'
+    );
   };
 
   // Computer-related things
@@ -95,13 +103,47 @@ export const Game = () => {
     setComputerShips(placedComputerShips);
   };
 
-  const hitComputer = (index) => {
-    setHitsByPlayer([
-      ...hitsByPlayer,
-      {
-        position: indexToCoords(index),
-      },
-    ]);
+  const computerFire = (index, layout) => {
+    if (layout[index] === 'ship') {
+      setHitsByComputer([
+        ...hitsByComputer,
+        {
+          position: indexToCoords(index),
+          type: SQUARE_STATE.hit,
+        },
+      ]);
+    }
+    if (layout[index] === 'empty') {
+      setHitsByComputer([
+        ...hitsByComputer,
+        {
+          position: indexToCoords(index),
+          type: SQUARE_STATE.miss,
+        },
+      ]);
+    }
+  };
+
+  const handleComputerTurn = () => {
+    let layout = placedShips.reduce(
+      (prevLayout, currentShip) =>
+        putEntityInLayout(prevLayout, currentShip, SQUARE_STATE.ship),
+      generateEmptyLayout()
+    );
+
+    layout = hitsByComputer.reduce(
+      (prevLayout, currentHit) =>
+        putEntityInLayout(prevLayout, currentHit, currentHit.type),
+      layout
+    );
+
+    let eligibleSquares = layout.filter(
+      (idx) => idx === 'miss' || idx === 'hit' || idx === 'empty'
+    ).length;
+    let randomIndex = generateRandomIndex(eligibleSquares);
+
+    setTimeout(computerFire(randomIndex, layout), 4000);
+    changeTurn();
   };
 
   return (
@@ -118,8 +160,10 @@ export const Game = () => {
       gameState={gameState}
       changeTurn={changeTurn}
       hitsByPlayer={hitsByPlayer}
-      hitComputer={hitComputer}
       setHitsByPlayer={setHitsByPlayer}
+      hitsByComputer={hitsByComputer}
+      setHitsByComputer={setHitsByComputer}
+      handleComputerTurn={handleComputerTurn}
     />
   );
 };

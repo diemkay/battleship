@@ -1,9 +1,10 @@
 import React from 'react';
 
 import { PlayerFleet } from './PlayerFleet';
-import { TestBoard } from './TestBoard';
+import { PlayerBoard } from './PlayerBoard';
 import { ComputerBoard } from './ComputerBoard';
 import { PlayerTips } from './PlayerTips';
+// import { TipBox } from './TipBox';
 
 export const GameView = ({
   availableShips,
@@ -20,11 +21,14 @@ export const GameView = ({
   hitComputer,
   hitsByPlayer,
   setHitsByPlayer,
+  hitsByComputer,
+  setHitsByComputer,
+  handleComputerTurn,
 }) => {
   return (
     <section id="game-screen">
-      {placedShips.length === 5 && gameState === 'player-turn' ? (
-        <PlayerTips gameState={gameState} />
+      {gameState !== 'placement' ? (
+        <PlayerTips gameState={gameState} hitsbyPlayer={hitsByPlayer} />
       ) : (
         <PlayerFleet
           availableShips={availableShips}
@@ -34,12 +38,13 @@ export const GameView = ({
         />
       )}
 
-      <TestBoard
+      <PlayerBoard
         currentlyPlacing={currentlyPlacing}
         setCurrentlyPlacing={setCurrentlyPlacing}
         rotateShip={rotateShip}
         placeShip={placeShip}
         placedShips={placedShips}
+        hitsByComputer={hitsByComputer}
       />
       <ComputerBoard
         computerShips={computerShips}
@@ -48,7 +53,9 @@ export const GameView = ({
         hitComputer={hitComputer}
         hitsByPlayer={hitsByPlayer}
         setHitsByPlayer={setHitsByPlayer}
+        handleComputerTurn={handleComputerTurn}
       />
+      {/* <TipBox gameState={gameState} changeTurn={changeTurn} /> */}
     </section>
   );
 };
