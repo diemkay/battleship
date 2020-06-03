@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { GameView } from './GameView';
-import { placeAllComputerShips } from './layoutHelpers';
+import { placeAllComputerShips, indexToCoords } from './layoutHelpers';
 
 const AVAILABLE_SHIPS = [
   {
@@ -38,6 +38,7 @@ export const Game = () => {
   const [placedShips, setPlacedShips] = useState([]);
   const [availableShips, setAvailableShips] = useState(AVAILABLE_SHIPS);
   const [computerShips, setComputerShips] = useState([]);
+  const [hitsByPlayer, setHitsByPlayer] = useState([]);
 
   // Player-related actions
   const selectShip = (shipName) => {
@@ -78,15 +79,29 @@ export const Game = () => {
   };
 
   const startTurn = () => {
-    console.log('HAI');
     generateComputerShips();
     setGameState('player-turn');
+  };
+
+  const changeTurn = () => {
+    gameState === 'player-turn'
+      ? setGameState('computer-turn')
+      : setGameState('player-turn');
   };
 
   // Computer-related things
   const generateComputerShips = () => {
     let placedComputerShips = placeAllComputerShips(AVAILABLE_SHIPS.slice());
     setComputerShips(placedComputerShips);
+  };
+
+  const hitComputer = (index) => {
+    setHitsByPlayer([
+      ...hitsByPlayer,
+      {
+        position: indexToCoords(index),
+      },
+    ]);
   };
 
   return (
@@ -101,6 +116,10 @@ export const Game = () => {
       startTurn={startTurn}
       computerShips={computerShips}
       gameState={gameState}
+      changeTurn={changeTurn}
+      hitsByPlayer={hitsByPlayer}
+      hitComputer={hitComputer}
+      setHitsByPlayer={setHitsByPlayer}
     />
   );
 };

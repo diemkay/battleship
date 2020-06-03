@@ -93,6 +93,14 @@ export const putEntityInLayout = (oldLayout, entity, type) => {
     });
   }
 
+  if (type === 'hit') {
+    newLayout[coordsToIndex(entity.position)] = SQUARE_STATE.hit;
+  }
+
+  if (type === 'miss') {
+    newLayout[coordsToIndex(entity.position)] = SQUARE_STATE.miss;
+  }
+
   return newLayout;
 };
 
@@ -163,15 +171,3 @@ export const placeCompShipInLayout = (ship, compLayout) => {
   });
   return newCompLayout;
 };
-
-// TODO: FIRE TORPEDO
-
-// An onclick handler for a square div
-// Whose turn is it? should be hanled elsewhere and fireTorpedo should be dumb
-
-// should check the state of the square in layout to see if it's empty, a ship, or already
-
-// find array[index of square hit]
-
-//TODO: Player Turn visual cues
-// Click button

@@ -16,6 +16,10 @@ export const GameView = ({
   startTurn,
   computerShips,
   gameState,
+  changeTurn,
+  hitComputer,
+  hitsByPlayer,
+  setHitsByPlayer,
 }) => {
   return (
     <section id="game-screen">
@@ -37,8 +41,14 @@ export const GameView = ({
         placeShip={placeShip}
         placedShips={placedShips}
       />
-      <ComputerBoard computerShips={computerShips} />
-      {/* <TipBox /> */}
+      <ComputerBoard
+        computerShips={computerShips}
+        changeTurn={changeTurn}
+        gameState={gameState}
+        hitComputer={hitComputer}
+        hitsByPlayer={hitsByPlayer}
+        setHitsByPlayer={setHitsByPlayer}
+      />
     </section>
   );
 };

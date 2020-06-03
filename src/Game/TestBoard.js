@@ -68,3 +68,8 @@ export const TestBoard = ({
     </div>
   );
 };
+
+// You don't change the layout
+// It's ephemeral
+// You decorate it
+// With items from a 'hits' array in state
