@@ -4,7 +4,6 @@ import { PlayerFleet } from './PlayerFleet';
 import { PlayerBoard } from './PlayerBoard';
 import { ComputerBoard } from './ComputerBoard';
 import { PlayerTips } from './PlayerTips';
-import { TipBox } from './TipBox';
 
 export const GameView = ({
   availableShips,
@@ -60,7 +59,6 @@ export const GameView = ({
         handleComputerTurn={handleComputerTurn}
         checkIfGameOver={checkIfGameOver}
       />
-      <TipBox gameState={gameState} changeTurn={changeTurn} />
     </section>
   );
 };
