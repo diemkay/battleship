@@ -4,7 +4,7 @@ import { PlayerFleet } from './PlayerFleet';
 import { PlayerBoard } from './PlayerBoard';
 import { ComputerBoard } from './ComputerBoard';
 import { PlayerTips } from './PlayerTips';
-// import { TipBox } from './TipBox';
+import { TipBox } from './TipBox';
 
 export const GameView = ({
   availableShips,
@@ -23,11 +23,16 @@ export const GameView = ({
   setHitsByPlayer,
   hitsByComputer,
   handleComputerTurn,
+  checkIfGameOver,
 }) => {
   return (
     <section id="game-screen">
       {gameState !== 'placement' ? (
-        <PlayerTips gameState={gameState} hitsbyPlayer={hitsByPlayer} />
+        <PlayerTips
+          gameState={gameState}
+          hitsbyPlayer={hitsByPlayer}
+          hitsByComputer={hitsByComputer}
+        />
       ) : (
         <PlayerFleet
           availableShips={availableShips}
@@ -53,8 +58,9 @@ export const GameView = ({
         hitsByPlayer={hitsByPlayer}
         setHitsByPlayer={setHitsByPlayer}
         handleComputerTurn={handleComputerTurn}
+        checkIfGameOver={checkIfGameOver}
       />
-      {/* <TipBox gameState={gameState} changeTurn={changeTurn} /> */}
+      <TipBox gameState={gameState} changeTurn={changeTurn} />
     </section>
   );
 };

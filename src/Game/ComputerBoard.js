@@ -14,6 +14,7 @@ export const ComputerBoard = ({
   setHitsByPlayer,
   changeTurn,
   handleComputerTurn,
+  checkIfGameOver,
 }) => {
   let compLayout = computerShips.reduce(
     (prevLayout, currentShip) =>
@@ -31,11 +32,6 @@ export const ComputerBoard = ({
 
   // Check what's at the square and decide what to do
   const fireTorpedo = (index) => {
-    // TODO later
-    // if (compLayout[index] === 'miss' || compLayout[index] === 'hit') {
-    //   return;
-    // }
-
     if (compLayout[index] === 'ship') {
       setHitsByPlayer([
         ...hitsByPlayer,
@@ -58,7 +54,6 @@ export const ComputerBoard = ({
 
   let compSquares = compLayout.map((square, index) => {
     return (
-      // Remove [stateToClass] when done so computer squares can't be guessed
       <div
         className={
           stateToClass[square] === 'hit' || stateToClass[square] === 'miss'
@@ -71,6 +66,7 @@ export const ComputerBoard = ({
           if (playerTurn) {
             fireTorpedo(index);
             handleComputerTurn();
+            checkIfGameOver();
             changeTurn();
           }
         }}

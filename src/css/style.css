@@ -171,6 +171,7 @@ li {
   box-sizing: border-box;
   background: #f6f8f9;
   border: 1px solid var(--oc-gray-3);
+  cursor: crosshair;
 }
 
 /* SQUARE COLORS */

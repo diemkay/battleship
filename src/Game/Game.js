@@ -125,6 +125,7 @@ export const Game = () => {
   };
 
   const handleComputerTurn = () => {
+    checkIfGameOver();
     let layout = placedShips.reduce(
       (prevLayout, currentShip) =>
         putEntityInLayout(prevLayout, currentShip, SQUARE_STATE.ship),
@@ -146,6 +147,19 @@ export const Game = () => {
     changeTurn();
   };
 
+  const checkIfGameOver = () => {
+    let successfulPlayerHits = hitsByPlayer.filter((hit) => hit.type === 'hit').length;
+    let successfulComputerHits = hitsByComputer.filter((hit) => hit.type === 'hit')
+      .length;
+
+    if (successfulComputerHits === 17 || successfulPlayerHits === 17) {
+      setGameState('game-over');
+      return true;
+    }
+
+    return false;
+  };
+
   return (
     <GameView
       availableShips={availableShips}
@@ -164,6 +178,7 @@ export const Game = () => {
       hitsByComputer={hitsByComputer}
       setHitsByComputer={setHitsByComputer}
       handleComputerTurn={handleComputerTurn}
+      checkIfGameOver={checkIfGameOver}
     />
   );
 };
