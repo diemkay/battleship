@@ -22,7 +22,6 @@ export const GameView = ({
   hitsByPlayer,
   setHitsByPlayer,
   hitsByComputer,
-  setHitsByComputer,
   handleComputerTurn,
 }) => {
   return (
