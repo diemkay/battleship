@@ -29,7 +29,7 @@ export const ComputerBoard = ({
   );
 
   const playerTurn = gameState === 'player-turn';
-  let hitBefore = (index) =>
+  let alreadyHit = (index) =>
     compLayout[index] === 'hit' ||
     compLayout[index] === 'miss' ||
     compLayout[index] === 'ship-sunk';
@@ -67,7 +67,7 @@ export const ComputerBoard = ({
         key={`comp-square-${index}`}
         id={`comp-square-${index}`}
         onClick={() => {
-          if (playerTurn && !hitBefore(index)) {
+          if (playerTurn && !alreadyHit(index)) {
             fireTorpedo(index);
             checkIfAnySank();
             handleComputerTurn();
