@@ -12,9 +12,9 @@ export const ComputerBoard = ({
   gameState,
   hitsByPlayer,
   setHitsByPlayer,
-  changeTurn,
   handleComputerTurn,
   checkIfGameOver,
+  checkIfAnySank,
 }) => {
   let compLayout = computerShips.reduce(
     (prevLayout, currentShip) =>
@@ -29,6 +29,10 @@ export const ComputerBoard = ({
   );
 
   const playerTurn = gameState === 'player-turn';
+  let hitBefore = (index) =>
+    compLayout[index] === 'hit' ||
+    compLayout[index] === 'miss' ||
+    compLayout[index] === 'ship-sunk';
 
   // Check what's at the square and decide what to do
   const fireTorpedo = (index) => {
@@ -63,11 +67,11 @@ export const ComputerBoard = ({
         key={`comp-square-${index}`}
         id={`comp-square-${index}`}
         onClick={() => {
-          if (playerTurn) {
+          if (playerTurn && !hitBefore(index)) {
             fireTorpedo(index);
+            checkIfAnySank();
             handleComputerTurn();
             checkIfGameOver();
-            changeTurn();
           }
         }}
       />

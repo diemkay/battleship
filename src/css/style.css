@@ -187,8 +187,8 @@ li {
 /* Ship */
 
 .board .ship {
-  background-color: var(--oc-blue-8);
-  border: 1px solid var(--oc-blue-9);
+  background-color: var(--oc-indigo-5);
+  border: 1px solid var(--oc-indigo-6);
 }
 
 .board .ship:hover {

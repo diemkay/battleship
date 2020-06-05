@@ -7,6 +7,7 @@ import {
   putEntityInLayout,
   generateEmptyLayout,
   generateRandomIndex,
+  entityIndices2,
 } from './layoutHelpers';
 
 const AVAILABLE_SHIPS = [
@@ -125,7 +126,12 @@ export const Game = () => {
   };
 
   const handleComputerTurn = () => {
-    checkIfGameOver();
+    changeTurn();
+
+    if (checkIfGameOver()) {
+      return;
+    }
+
     let layout = placedShips.reduce(
       (prevLayout, currentShip) =>
         putEntityInLayout(prevLayout, currentShip, SQUARE_STATE.ship),
@@ -143,8 +149,10 @@ export const Game = () => {
     ).length;
     let randomIndex = generateRandomIndex(eligibleSquares);
 
-    setTimeout(computerFire(randomIndex, layout), 4000);
-    changeTurn();
+    setTimeout(() => {
+      computerFire(randomIndex, layout);
+      changeTurn();
+    }, 300);
   };
 
   const checkIfGameOver = () => {
@@ -159,6 +167,11 @@ export const Game = () => {
 
     return false;
   };
+
+  // TODO: Start again button to reset gameplay
+
+  // TODO: Check if a ship was sunk
+  const checkIfAnySank = () => {};
 
   return (
     <GameView
@@ -179,6 +192,7 @@ export const Game = () => {
       setHitsByComputer={setHitsByComputer}
       handleComputerTurn={handleComputerTurn}
       checkIfGameOver={checkIfGameOver}
+      checkIfAnySank={checkIfAnySank}
     />
   );
 };
