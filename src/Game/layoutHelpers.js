@@ -102,6 +102,12 @@ export const putEntityInLayout = (oldLayout, entity, type) => {
     newLayout[coordsToIndex(entity.position)] = SQUARE_STATE.miss;
   }
 
+  if (type === 'ship-sunk') {
+    entityIndices(entity).forEach((idx) => {
+      newLayout[idx] = SQUARE_STATE.ship_sunk;
+    });
+  }
+
   return newLayout;
 };
 

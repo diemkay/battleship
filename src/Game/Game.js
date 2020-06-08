@@ -8,6 +8,7 @@ import {
   generateEmptyLayout,
   generateRandomIndex,
   entityIndices2,
+  coordsToIndex,
 } from './layoutHelpers';
 
 const AVAILABLE_SHIPS = [
@@ -41,6 +42,7 @@ const AVAILABLE_SHIPS = [
 export const Game = () => {
   const [gameState, setGameState] = useState('placement');
   // placement, player-turn, computer-turn, game-over (?)
+  //  TODO: const [winner, setWinner] = useState(null);
 
   const [currentlyPlacing, setCurrentlyPlacing] = useState(null);
   const [placedShips, setPlacedShips] = useState([]);
@@ -125,6 +127,7 @@ export const Game = () => {
     }
   };
 
+  // Change to computer turn, check if game over and stop if yes; if not fire into an eligible square
   const handleComputerTurn = () => {
     changeTurn();
 
@@ -155,6 +158,7 @@ export const Game = () => {
     }, 300);
   };
 
+  // Check if either player or computer ended the game
   const checkIfGameOver = () => {
     let successfulPlayerHits = hitsByPlayer.filter((hit) => hit.type === 'hit').length;
     let successfulComputerHits = hitsByComputer.filter((hit) => hit.type === 'hit')
@@ -168,10 +172,28 @@ export const Game = () => {
     return false;
   };
 
+  // TODO: setWinner to display at the end of the game
+
   // TODO: Start again button to reset gameplay
 
   // TODO: Check if a ship was sunk
-  const checkIfAnySank = () => {};
+
+  const updateSunkShips = (currentHits) => {
+    let playerHitIndices = currentHits.map((hit) => coordsToIndex(hit.position));
+
+    let indexWasHit = (index) => playerHitIndices.includes(index);
+
+    let shipsWithSunkFlag = computerShips.map((ship) => {
+      let shipIndices = entityIndices2(ship);
+      if (shipIndices.every((idx) => indexWasHit(idx))) {
+        return { ...ship, sunk: true };
+      } else {
+        return { ...ship, sunk: false };
+      }
+    });
+
+    setComputerShips(shipsWithSunkFlag);
+  };
 
   return (
     <GameView
@@ -192,7 +214,7 @@ export const Game = () => {
       setHitsByComputer={setHitsByComputer}
       handleComputerTurn={handleComputerTurn}
       checkIfGameOver={checkIfGameOver}
-      checkIfAnySank={checkIfAnySank}
+      updateSunkShips={updateSunkShips}
     />
   );
 };

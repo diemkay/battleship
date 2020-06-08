@@ -23,7 +23,7 @@ export const GameView = ({
   hitsByComputer,
   handleComputerTurn,
   checkIfGameOver,
-  checkIfAnySank,
+  updateSunkShips,
 }) => {
   return (
     <section id="game-screen">
@@ -59,7 +59,7 @@ export const GameView = ({
         setHitsByPlayer={setHitsByPlayer}
         handleComputerTurn={handleComputerTurn}
         checkIfGameOver={checkIfGameOver}
-        checkIfAnySank={checkIfAnySank}
+        updateSunkShips={updateSunkShips}
       />
     </section>
   );
