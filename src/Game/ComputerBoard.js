@@ -23,7 +23,7 @@ export const ComputerBoard = ({
     generateEmptyLayout()
   );
 
-  //  Add hits deealt by player
+  //  Add hits dealt by player
   compLayout = hitsByPlayer.reduce(
     (prevLayout, currentHit) =>
       putEntityInLayout(prevLayout, currentHit, currentHit.type),

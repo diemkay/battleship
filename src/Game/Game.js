@@ -9,6 +9,7 @@ import {
   generateRandomIndex,
   entityIndices2,
   coordsToIndex,
+  getNeighbors,
 } from './layoutHelpers';
 
 const AVAILABLE_SHIPS = [
@@ -51,7 +52,7 @@ export const Game = () => {
   const [hitsByPlayer, setHitsByPlayer] = useState([]);
   const [hitsByComputer, setHitsByComputer] = useState([]);
 
-  // Player-related actions
+  // *** PLAYER ***
   const selectShip = (shipName) => {
     let shipIdx = availableShips.findIndex((ship) => ship.name === shipName);
     const shipToPlace = availableShips[shipIdx];
@@ -100,7 +101,7 @@ export const Game = () => {
     );
   };
 
-  // Computer-related things
+  // *** COMPUTER ***
   const generateComputerShips = () => {
     let placedComputerShips = placeAllComputerShips(AVAILABLE_SHIPS.slice());
     setComputerShips(placedComputerShips);
@@ -135,6 +136,7 @@ export const Game = () => {
       return;
     }
 
+    // Recreate layout to get eligible squares
     let layout = placedShips.reduce(
       (prevLayout, currentShip) =>
         putEntityInLayout(prevLayout, currentShip, SQUARE_STATE.ship),
@@ -147,16 +149,31 @@ export const Game = () => {
       layout
     );
 
-    let eligibleSquares = layout.filter(
-      (idx) => idx === 'miss' || idx === 'hit' || idx === 'empty'
-    ).length;
-    let randomIndex = generateRandomIndex(eligibleSquares);
+    let successfulComputerHits = hitsByComputer.filter((hit) => hit.type === 'hit');
+
+    let potentialTargets = successfulComputerHits
+      .flatMap((hit) => getNeighbors(hit.position))
+      .filter((idx) => layout[idx] === 'empty' || layout[idx] === 'ship');
+
+    // Until there's a successful hit
+    if (potentialTargets.length === 0) {
+      let layoutIndices = layout.map((item, idx) => idx);
+      potentialTargets = layoutIndices.filter(
+        (index) => layout[index] === 'ship' || layout[index] === 'empty'
+      );
+    }
+
+    let randomIndex = generateRandomIndex(potentialTargets.length);
+
+    let target = potentialTargets[randomIndex];
 
     setTimeout(() => {
-      computerFire(randomIndex, layout);
+      computerFire(target, layout);
       changeTurn();
     }, 300);
   };
+
+  // *** END GAME ***
 
   // Check if either player or computer ended the game
   const checkIfGameOver = () => {
@@ -176,8 +193,7 @@ export const Game = () => {
 
   // TODO: Start again button to reset gameplay
 
-  // TODO: Check if a ship was sunk
-
+  // Give ships a sunk flag to update their color
   const updateSunkShips = (currentHits) => {
     let playerHitIndices = currentHits.map((hit) => coordsToIndex(hit.position));
 

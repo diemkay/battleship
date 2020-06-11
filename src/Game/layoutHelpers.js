@@ -178,3 +178,67 @@ export const placeCompShipInLayout = (ship, compLayout) => {
   });
   return newCompLayout;
 };
+
+// Gets the neighboring squares to a successful computer hit
+export const getNeighbors = (coords) => {
+  let firstRow = coords.y === 0;
+  let lastRow = coords.y === 9;
+  let firstColumn = coords.x === 0;
+  let lastColumn = coords.x === 9;
+
+  let neighbors = [];
+
+  // coords.y === 0;
+  if (firstRow) {
+    neighbors.push(
+      { x: coords.x + 1, y: coords.y },
+      { x: coords.x - 1, y: coords.y },
+      { x: coords.x, y: coords.y + 1 }
+    );
+  }
+
+  // coords.y === 9;
+  if (lastRow) {
+    neighbors.push(
+      { x: coords.x + 1, y: coords.y },
+      { x: coords.x - 1, y: coords.y },
+      { x: coords.x, y: coords.y - 1 }
+    );
+  }
+  // coords.x === 0
+  if (firstColumn) {
+    neighbors.push(
+      { x: coords.x + 1, y: coords.y }, // right
+      { x: coords.x, y: coords.y + 1 }, // down
+      { x: coords.x, y: coords.y - 1 } // up
+    );
+  }
+
+  // coords.x === 9
+  if (lastColumn) {
+    neighbors.push(
+      { x: coords.x - 1, y: coords.y }, // left
+      { x: coords.x, y: coords.y + 1 }, // down
+      { x: coords.x, y: coords.y - 1 } // up
+    );
+  }
+
+  if (!lastColumn || !firstColumn || !lastRow || !firstRow) {
+    neighbors.push(
+      { x: coords.x - 1, y: coords.y }, // left
+      { x: coords.x + 1, y: coords.y }, // right
+      { x: coords.x, y: coords.y - 1 }, // up
+      { x: coords.x, y: coords.y + 1 } // down
+    );
+  }
+
+  let filteredResult = [
+    ...new Set(
+      neighbors
+        .map((coords) => coordsToIndex(coords))
+        .filter((number) => number >= 0 && number < BOARD)
+    ),
+  ];
+
+  return filteredResult;
+};
