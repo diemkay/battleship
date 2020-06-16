@@ -29,7 +29,7 @@ export const PlayerFleet = ({
 
   let playButton = (
     <div id="play-ready">
-      <p>Ships are in formation.</p>
+      <p className="player-tip">Ships are in formation.</p>
       <button id="play-button" onClick={startTurn}>
         Start game
       </button>
@@ -38,7 +38,7 @@ export const PlayerFleet = ({
 
   return (
     <div id="available-ships">
-      <div id="tip-box-title"> Your Ships</div>
+      <div className="tip-box-title"> Your Ships</div>
       {availableShips.length > 0 ? fleet : playButton}
     </div>
   );

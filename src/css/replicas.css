@@ -1,0 +1,95 @@
+@import './open-color.css';
+
+:root {
+  --micro-space: 0.3em;
+  --small-space: 1em;
+  --medium-space: 2em;
+}
+
+/* REPLICAS  */
+
+#replica-fleet {
+  padding: var(--small-space);
+}
+
+#replica-fleet > * + * {
+  margin-top: var(--small-space);
+}
+
+.replica,
+.replica-squares {
+  display: flex;
+  flex-direction: row;
+}
+
+.replica {
+  width: 150px;
+  height: 35px;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--oc-indigo-6);
+  border-radius: 3px;
+  padding: 5px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px hsla(0, 0%, 0.2);
+}
+
+.replica:hover {
+  background-color: var(--oc-indigo-3);
+  opacity: 0.9;
+}
+
+.replica:active {
+  position: relative;
+  top: 1px;
+}
+
+.placing {
+  background-color: var(--oc-indigo-2);
+}
+
+.placing:hover {
+  background-color: var(--oc-indigo-2);
+}
+
+/* Each ship name */
+
+.replica-title {
+  font-size: 14px;
+  text-transform: capitalize;
+  font-family: 'Libre Franklin', sans-serif;
+  color: var(--oc-white);
+}
+
+.small-square {
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--oc-yellow-5);
+  background-color: var(--oc-yellow-4);
+}
+
+/* Firing info */
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  margin: 5px;
+}
+
+/* TODO: FIX THIS SCREEN SO THINGS FIT NICELY!!!  */
+
+@media screen and (max-width: 768px) {
+  #replica-ships {
+    max-width: 400px;
+    height: 250px;
+  }
+}
+
+.player-title {
+  color: var(--oc-red-7);
+  text-align: center;
+}

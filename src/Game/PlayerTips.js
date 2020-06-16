@@ -18,9 +18,7 @@ export const PlayerTips = ({ gameState, hitsbyPlayer, hitsByComputer }) => {
           <li>{numberOfSuccessfulHits} successful hits</li>
           <li>{accuracyScore > 0 ? `${accuracyScore}%` : `0%`} accuracy </li>
         </ul>
-        <p className="player-tip">
-          The first to sink all opponent ships (17 quares) wins.
-        </p>
+        <p className="player-tip">The first to sink all 5 opponent ships wins.</p>
       </div>
     </div>
   );
