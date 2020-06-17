@@ -39,6 +39,8 @@ main {
 main,
 section {
   margin: var(--medium-space);
+  text-align: center;
+  max-width: 35em;
 }
 
 #game-screen {
@@ -126,7 +128,7 @@ h1 {
 /* Headings used in board and tip box */
 
 h2 {
-  color: var(--oc-red-2);
+  color: var(--oc-red-7);
   font-family: var(--headlines);
 }
 
