@@ -19,7 +19,7 @@ export const PlayerTips = ({
         {winner === 'player' ? 'You win! 🎉' : 'Computer won 😭. Better luck next time '}
       </p>
       <p className="restart" onClick={startAgain}>
-        Restart
+        Play again?
       </p>
     </div>
   );
