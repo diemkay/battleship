@@ -40,6 +40,9 @@ main,
 section {
   margin: var(--medium-space);
   text-align: center;
+}
+
+main {
   max-width: 35em;
 }
 
