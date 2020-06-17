@@ -24,6 +24,8 @@ export const GameView = ({
   handleComputerTurn,
   checkIfGameOver,
   updateSunkShips,
+  winner,
+  startAgain,
 }) => {
   return (
     <section id="game-screen">
@@ -32,6 +34,8 @@ export const GameView = ({
           gameState={gameState}
           hitsbyPlayer={hitsByPlayer}
           hitsByComputer={hitsByComputer}
+          winner={winner}
+          startAgain={startAgain}
         />
       ) : (
         <PlayerFleet
@@ -39,6 +43,7 @@ export const GameView = ({
           selectShip={selectShip}
           currentlyPlacing={currentlyPlacing}
           startTurn={startTurn}
+          startAgain={startAgain}
         />
       )}
 

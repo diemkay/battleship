@@ -6,6 +6,7 @@ export const PlayerFleet = ({
   selectShip,
   currentlyPlacing,
   startTurn,
+  startAgain,
 }) => {
   let shipsLeft = availableShips.map((ship) => ship.name);
 
@@ -24,6 +25,9 @@ export const PlayerFleet = ({
     <div id="replica-fleet">
       {shipReplicaBoxes}
       <p className="player-tip">Right click to rotate before you position.</p>
+      <p className="restart" onClick={startAgain}>
+        Restart
+      </p>
     </div>
   );
 

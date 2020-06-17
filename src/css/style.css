@@ -82,6 +82,15 @@ section {
   color: var(--oc-gray-7);
 }
 
+.restart {
+  color: var(--oc-red-7);
+  font-family: var(--regular);
+  cursor: pointer;
+  font-size: 12px;
+  text-decoration: underline;
+  margin: var(--small-space);
+}
+
 #game-over {
   font-size: 30px;
 }

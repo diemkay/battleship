@@ -43,7 +43,7 @@ const AVAILABLE_SHIPS = [
 export const Game = () => {
   const [gameState, setGameState] = useState('placement');
   // placement, player-turn, computer-turn, game-over (?)
-  //  TODO: const [winner, setWinner] = useState(null);
+  const [winner, setWinner] = useState(null);
 
   const [currentlyPlacing, setCurrentlyPlacing] = useState(null);
   const [placedShips, setPlacedShips] = useState([]);
@@ -183,15 +183,30 @@ export const Game = () => {
 
     if (successfulComputerHits === 17 || successfulPlayerHits === 17) {
       setGameState('game-over');
+
+      if (successfulComputerHits === 17) {
+        setWinner('computer');
+      }
+      if (successfulPlayerHits === 17) {
+        setWinner('player');
+      }
+
       return true;
     }
 
     return false;
   };
 
-  // TODO: setWinner to display at the end of the game
-
-  // TODO: Start again button to reset gameplay
+  const startAgain = () => {
+    setGameState('placement');
+    setWinner(null);
+    setCurrentlyPlacing(null);
+    setPlacedShips([]);
+    setAvailableShips(AVAILABLE_SHIPS);
+    setComputerShips([]);
+    setHitsByPlayer([]);
+    setHitsByComputer([]);
+  };
 
   // Give ships a sunk flag to update their color
   const updateSunkShips = (currentHits) => {
@@ -231,6 +246,8 @@ export const Game = () => {
       handleComputerTurn={handleComputerTurn}
       checkIfGameOver={checkIfGameOver}
       updateSunkShips={updateSunkShips}
+      startAgain={startAgain}
+      winner={winner}
     />
   );
 };
