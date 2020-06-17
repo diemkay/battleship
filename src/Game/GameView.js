@@ -26,6 +26,7 @@ export const GameView = ({
   updateSunkShips,
   winner,
   startAgain,
+  setComputerShips,
 }) => {
   return (
     <section id="game-screen">
@@ -64,7 +65,7 @@ export const GameView = ({
         setHitsByPlayer={setHitsByPlayer}
         handleComputerTurn={handleComputerTurn}
         checkIfGameOver={checkIfGameOver}
-        updateSunkShips={updateSunkShips}
+        setComputerShips={setComputerShips}
       />
     </section>
   );

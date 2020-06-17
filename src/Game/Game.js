@@ -7,9 +7,9 @@ import {
   putEntityInLayout,
   generateEmptyLayout,
   generateRandomIndex,
-  entityIndices2,
-  coordsToIndex,
   getNeighbors,
+  updateSunkShips,
+  coordsToIndex,
 } from './layoutHelpers';
 
 const AVAILABLE_SHIPS = [
@@ -42,7 +42,6 @@ const AVAILABLE_SHIPS = [
 
 export const Game = () => {
   const [gameState, setGameState] = useState('placement');
-  // placement, player-turn, computer-turn, game-over (?)
   const [winner, setWinner] = useState(null);
 
   const [currentlyPlacing, setCurrentlyPlacing] = useState(null);
@@ -108,24 +107,30 @@ export const Game = () => {
   };
 
   const computerFire = (index, layout) => {
+    let computerHits;
+
     if (layout[index] === 'ship') {
-      setHitsByComputer([
+      computerHits = [
         ...hitsByComputer,
         {
           position: indexToCoords(index),
           type: SQUARE_STATE.hit,
         },
-      ]);
+      ];
     }
     if (layout[index] === 'empty') {
-      setHitsByComputer([
+      computerHits = [
         ...hitsByComputer,
         {
           position: indexToCoords(index),
           type: SQUARE_STATE.miss,
         },
-      ]);
+      ];
     }
+    const sunkShips = updateSunkShips(computerHits, placedShips);
+
+    setPlacedShips(sunkShips);
+    setHitsByComputer(computerHits);
   };
 
   // Change to computer turn, check if game over and stop if yes; if not fire into an eligible square
@@ -149,9 +154,22 @@ export const Game = () => {
       layout
     );
 
+    layout = placedShips.reduce(
+      (prevLayout, currentShip) =>
+        currentShip.sunk
+          ? putEntityInLayout(prevLayout, currentShip, SQUARE_STATE.ship_sunk)
+          : prevLayout,
+      layout
+    );
+
     let successfulComputerHits = hitsByComputer.filter((hit) => hit.type === 'hit');
 
-    let potentialTargets = successfulComputerHits
+    let nonSunkComputerHits = successfulComputerHits.filter((hit) => {
+      const hitIndex = coordsToIndex(hit.position);
+      return layout[hitIndex] === 'hit';
+    });
+
+    let potentialTargets = nonSunkComputerHits
       .flatMap((hit) => getNeighbors(hit.position))
       .filter((idx) => layout[idx] === 'empty' || layout[idx] === 'ship');
 
@@ -208,24 +226,6 @@ export const Game = () => {
     setHitsByComputer([]);
   };
 
-  // Give ships a sunk flag to update their color
-  const updateSunkShips = (currentHits) => {
-    let playerHitIndices = currentHits.map((hit) => coordsToIndex(hit.position));
-
-    let indexWasHit = (index) => playerHitIndices.includes(index);
-
-    let shipsWithSunkFlag = computerShips.map((ship) => {
-      let shipIndices = entityIndices2(ship);
-      if (shipIndices.every((idx) => indexWasHit(idx))) {
-        return { ...ship, sunk: true };
-      } else {
-        return { ...ship, sunk: false };
-      }
-    });
-
-    setComputerShips(shipsWithSunkFlag);
-  };
-
   return (
     <GameView
       availableShips={availableShips}
@@ -245,9 +245,9 @@ export const Game = () => {
       setHitsByComputer={setHitsByComputer}
       handleComputerTurn={handleComputerTurn}
       checkIfGameOver={checkIfGameOver}
-      updateSunkShips={updateSunkShips}
       startAgain={startAgain}
       winner={winner}
+      setComputerShips={setComputerShips}
     />
   );
 };

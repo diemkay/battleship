@@ -27,9 +27,7 @@ export const PlayerTips = ({
 
   let tipsPanel = (
     <div>
-      <div className="tip-box-title">
-        It's {gameState === 'player-turn' ? 'Your' : "The opponent's"} turn!
-      </div>
+      <div className="tip-box-title">Stats</div>
       <div id="firing-info">
         <ul>
           <li>{numberOfSuccessfulHits} successful hits</li>

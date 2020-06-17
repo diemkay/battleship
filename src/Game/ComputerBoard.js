@@ -5,6 +5,7 @@ import {
   putEntityInLayout,
   SQUARE_STATE,
   indexToCoords,
+  updateSunkShips,
 } from './layoutHelpers';
 
 export const ComputerBoard = ({
@@ -14,7 +15,7 @@ export const ComputerBoard = ({
   setHitsByPlayer,
   handleComputerTurn,
   checkIfGameOver,
-  updateSunkShips,
+  setComputerShips,
 }) => {
   // Ships on an empty layout
   let compLayout = computerShips.reduce(
@@ -88,7 +89,8 @@ export const ComputerBoard = ({
         onClick={() => {
           if (playerCanFire && !alreadyHit(index)) {
             const newHits = fireTorpedo(index);
-            updateSunkShips(newHits);
+            const shipsWithSunkFlag = updateSunkShips(newHits, computerShips);
+            setComputerShips(shipsWithSunkFlag);
             handleComputerTurn();
           }
         }}

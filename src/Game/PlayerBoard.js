@@ -31,6 +31,14 @@ export const PlayerBoard = ({
     layout
   );
 
+  layout = placedShips.reduce(
+    (prevLayout, currentShip) =>
+      currentShip.sunk
+        ? putEntityInLayout(prevLayout, currentShip, SQUARE_STATE.ship_sunk)
+        : prevLayout,
+    layout
+  );
+
   const isPlacingOverBoard = currentlyPlacing && currentlyPlacing.position != null;
   const canPlaceCurrentShip = isPlacingOverBoard && canBePlaced(currentlyPlacing, layout);
 
