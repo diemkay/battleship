@@ -16,6 +16,7 @@ export const ComputerBoard = ({
   handleComputerTurn,
   checkIfGameOver,
   setComputerShips,
+  playSound,
 }) => {
   // Ships on an empty layout
   let compLayout = computerShips.reduce(
@@ -90,6 +91,11 @@ export const ComputerBoard = ({
           if (playerCanFire && !alreadyHit(index)) {
             const newHits = fireTorpedo(index);
             const shipsWithSunkFlag = updateSunkShips(newHits, computerShips);
+            const sunkShipsAfter = shipsWithSunkFlag.filter((ship) => ship.sunk).length;
+            const sunkShipsBefore = computerShips.filter((ship) => ship.sunk).length;
+            if (sunkShipsAfter > sunkShipsBefore) {
+              playSound('sunk');
+            }
             setComputerShips(shipsWithSunkFlag);
             handleComputerTurn();
           }

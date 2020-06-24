@@ -23,10 +23,10 @@ export const GameView = ({
   hitsByComputer,
   handleComputerTurn,
   checkIfGameOver,
-  updateSunkShips,
   winner,
   startAgain,
   setComputerShips,
+  playSound,
 }) => {
   return (
     <section id="game-screen">
@@ -55,6 +55,7 @@ export const GameView = ({
         placeShip={placeShip}
         placedShips={placedShips}
         hitsByComputer={hitsByComputer}
+        playSound={playSound}
       />
       <ComputerBoard
         computerShips={computerShips}
@@ -66,6 +67,7 @@ export const GameView = ({
         handleComputerTurn={handleComputerTurn}
         checkIfGameOver={checkIfGameOver}
         setComputerShips={setComputerShips}
+        playSound={playSound}
       />
     </section>
   );

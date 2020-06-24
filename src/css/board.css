@@ -21,12 +21,23 @@
   transition: background-color 100ms ease-in-out;
 }
 
+/* Option 1 */
 @keyframes spin {
   from {
     transform: rotate(0deg);
   }
   to {
     transform: rotate(360deg);
+  }
+}
+/* Option 2 */
+@keyframes shake {
+  from {
+    transform: translate(30%, 17%);
+  }
+
+  to {
+    transform: translate(-30%, -17%);
   }
 }
 
@@ -70,7 +81,7 @@
 .board .ship-sunk {
   background-color: var(--oc-gray-9);
   border: 1px solid var(--oc-gray-8);
-  animation: spin 1s 1 alternate backwards;
+  animation: shake 50ms 6 alternate backwards;
 }
 
 /* Forbidden square  */

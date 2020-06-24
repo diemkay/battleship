@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { GameView } from './GameView';
 import {
   placeAllComputerShips,
@@ -128,7 +128,12 @@ export const Game = () => {
       ];
     }
     const sunkShips = updateSunkShips(computerHits, placedShips);
-
+    const sunkShipsAfter = sunkShips.filter((ship) => ship.sunk).length;
+    const sunkShipsBefore = placedShips.filter((ship) => ship.sunk).length;
+    console.log(sunkShipsAfter, sunkShipsBefore);
+    if (sunkShipsAfter > sunkShipsBefore) {
+      playSound('sunk');
+    }
     setPlacedShips(sunkShips);
     setHitsByComputer(computerHits);
   };
@@ -226,28 +231,45 @@ export const Game = () => {
     setHitsByComputer([]);
   };
 
+  const sunkSoundRef = useRef(null);
+
+  const playSound = (sound) => {
+    if (sound === 'sunk') {
+      sunkSoundRef.current.play();
+    }
+  };
   return (
-    <GameView
-      availableShips={availableShips}
-      selectShip={selectShip}
-      currentlyPlacing={currentlyPlacing}
-      setCurrentlyPlacing={setCurrentlyPlacing}
-      rotateShip={rotateShip}
-      placeShip={placeShip}
-      placedShips={placedShips}
-      startTurn={startTurn}
-      computerShips={computerShips}
-      gameState={gameState}
-      changeTurn={changeTurn}
-      hitsByPlayer={hitsByPlayer}
-      setHitsByPlayer={setHitsByPlayer}
-      hitsByComputer={hitsByComputer}
-      setHitsByComputer={setHitsByComputer}
-      handleComputerTurn={handleComputerTurn}
-      checkIfGameOver={checkIfGameOver}
-      startAgain={startAgain}
-      winner={winner}
-      setComputerShips={setComputerShips}
-    />
+    <React.Fragment>
+      <audio
+        ref={sunkSoundRef}
+        id="sunk-ship-sound"
+        src="/sounds/ship_sunk.wav"
+        className="clip"
+        preload="auto"
+      />
+      <GameView
+        availableShips={availableShips}
+        selectShip={selectShip}
+        currentlyPlacing={currentlyPlacing}
+        setCurrentlyPlacing={setCurrentlyPlacing}
+        rotateShip={rotateShip}
+        placeShip={placeShip}
+        placedShips={placedShips}
+        startTurn={startTurn}
+        computerShips={computerShips}
+        gameState={gameState}
+        changeTurn={changeTurn}
+        hitsByPlayer={hitsByPlayer}
+        setHitsByPlayer={setHitsByPlayer}
+        hitsByComputer={hitsByComputer}
+        setHitsByComputer={setHitsByComputer}
+        handleComputerTurn={handleComputerTurn}
+        checkIfGameOver={checkIfGameOver}
+        startAgain={startAgain}
+        winner={winner}
+        setComputerShips={setComputerShips}
+        playSound={playSound}
+      />
+    </React.Fragment>
   );
 };
