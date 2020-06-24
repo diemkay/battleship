@@ -14,4 +14,5 @@ My goal is to improve my React skills. I chose to build this particular game bec
 
 ## Credits
 
-Made with [Create React App](https://github.com/facebook/create-react-app).
+- Made with [Create React App](https://github.com/facebook/create-react-app).
+- Sounds from [Leshy Online Sound Generator](https://www.leshylabs.com/apps/sfMaker/) and [FreeSound.org](https://freesound.org/), specifically [LittleRobotSoundFactory](people/LittleRobotSoundFactory/sounds/270468/).
