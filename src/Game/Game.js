@@ -130,7 +130,6 @@ export const Game = () => {
     const sunkShips = updateSunkShips(computerHits, placedShips);
     const sunkShipsAfter = sunkShips.filter((ship) => ship.sunk).length;
     const sunkShipsBefore = placedShips.filter((ship) => ship.sunk).length;
-    console.log(sunkShipsAfter, sunkShipsBefore);
     if (sunkShipsAfter > sunkShipsBefore) {
       playSound('sunk');
     }
@@ -209,9 +208,11 @@ export const Game = () => {
 
       if (successfulComputerHits === 17) {
         setWinner('computer');
+        playSound('lose');
       }
       if (successfulPlayerHits === 17) {
         setWinner('player');
+        playSound('win');
       }
 
       return true;
@@ -232,21 +233,51 @@ export const Game = () => {
   };
 
   const sunkSoundRef = useRef(null);
+  const clickSoundRef = useRef(null);
+  const lossSoundRef = useRef(null);
+  const winSoundRef = useRef(null);
 
+  const stopSound = (sound) => {
+    sound.current.pause();
+    sound.current.currentTime = 0;
+  };
   const playSound = (sound) => {
     if (sound === 'sunk') {
+      stopSound(sunkSoundRef);
       sunkSoundRef.current.play();
+    }
+
+    if (sound === 'click') {
+      stopSound(clickSoundRef);
+      clickSoundRef.current.play();
+    }
+
+    if (sound === 'lose') {
+      stopSound(lossSoundRef);
+      lossSoundRef.current.play();
+    }
+
+    if (sound === 'win') {
+      stopSound(winSoundRef);
+      winSoundRef.current.play();
     }
   };
   return (
     <React.Fragment>
       <audio
         ref={sunkSoundRef}
-        id="sunk-ship-sound"
         src="/sounds/ship_sunk.wav"
         className="clip"
         preload="auto"
       />
+      <audio
+        ref={clickSoundRef}
+        src="/sounds/click.wav"
+        className="clip"
+        preload="auto"
+      />
+      <audio ref={lossSoundRef} src="/sounds/lose.wav" className="clip" preload="auto" />
+      <audio ref={winSoundRef} src="/sounds/win.wav" className="clip" preload="auto" />
       <GameView
         availableShips={availableShips}
         selectShip={selectShip}

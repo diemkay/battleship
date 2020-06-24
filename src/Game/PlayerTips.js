@@ -16,7 +16,7 @@ export const PlayerTips = ({
     <div>
       <div className="tip-box-title">Game Over!</div>
       <p className="player-tip">
-        {winner === 'player' ? 'You win! 🎉' : 'Computer won 😭. Better luck next time '}
+        {winner === 'player' ? 'You win! 🎉' : 'You lose 😭. Better luck next time! '}
       </p>
       <p className="restart" onClick={startAgain}>
         Play again?

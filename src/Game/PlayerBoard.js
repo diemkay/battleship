@@ -16,6 +16,7 @@ export const PlayerBoard = ({
   placeShip,
   placedShips,
   hitsByComputer,
+  playSound,
 }) => {
   // Player ships on empty layout
   let layout = placedShips.reduce(
@@ -60,6 +61,7 @@ export const PlayerBoard = ({
         onMouseDown={rotateShip}
         onClick={() => {
           if (canPlaceCurrentShip) {
+            playSound('click');
             placeShip(currentlyPlacing);
           }
         }}

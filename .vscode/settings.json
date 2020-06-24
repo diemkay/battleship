@@ -1,16 +1,16 @@
 {
     "liveServer.settings.port": 5501,
     "workbench.colorCustomizations": {
-        "tab.activeBorder": "#a2e6e2",
-        "titleBar.activeBackground": "#a2e6e2",
-        "titleBar.border": "#a2e6e2",
-        "titleBar.inactiveBackground": "#a2e6e299",
+        "tab.activeBorder": "#a8e20f",
+        "titleBar.activeBackground": "#a8e20f",
+        "titleBar.border": "#a8e20f",
+        "titleBar.inactiveBackground": "#a8e20f99",
         "titleBar.activeForeground": "#15202b",
         "titleBar.inactiveForeground": "#15202b99",
-        "statusBar.background": "#a2e6e2",
-        "statusBar.border": "#a2e6e2",
+        "statusBar.background": "#a8e20f",
+        "statusBar.border": "#a8e20f",
         "statusBar.foreground": "#15202b",
-        "statusBarItem.hoverBackground": "#7adbd5"
+        "statusBarItem.hoverBackground": "#84b20c"
     },
-    "peacock.color": "#a2e6e2"
+    "peacock.color": "#a8e20f"
 }
