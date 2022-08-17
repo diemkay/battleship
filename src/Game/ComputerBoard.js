@@ -89,6 +89,8 @@ export const ComputerBoard = ({
         id={`comp-square-${index}`}
         onClick={() => {
           if (playerCanFire && !alreadyHit(index)) {
+
+            console.log('click index=', index)
             const newHits = fireTorpedo(index);
             const shipsWithSunkFlag = updateSunkShips(newHits, computerShips);
             const sunkShipsAfter = shipsWithSunkFlag.filter((ship) => ship.sunk).length;
@@ -96,6 +98,8 @@ export const ComputerBoard = ({
             if (sunkShipsAfter > sunkShipsBefore) {
               playSound('sunk');
             }
+
+            console.log('setComputerShips 1', shipsWithSunkFlag)
             setComputerShips(shipsWithSunkFlag);
             handleComputerTurn();
           }

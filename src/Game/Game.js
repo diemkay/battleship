@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import Balance from './balance';
 import { GameView } from './GameView';
 import {
   placeAllComputerShips,
@@ -119,6 +120,8 @@ export const Game = () => {
   // *** COMPUTER ***
   const generateComputerShips = () => {
     let placedComputerShips = placeAllComputerShips(AVAILABLE_SHIPS.slice());
+
+    console.log('generateComputerShips', placedComputerShips)
     setComputerShips(placedComputerShips);
   };
 
@@ -395,6 +398,7 @@ export const Game = () => {
         setComputerShips={setComputerShips}
         playSound={playSound}
       />
+      <Balance></Balance>
     </React.Fragment>
   );
 };
