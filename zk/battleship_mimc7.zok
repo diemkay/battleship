@@ -1,0 +1,28 @@
+import "./mimc7" as mimc7;
+
+def main(private field carrierX, private field carrierY, private field carrierO, private field battleshipX, private field battleshipY, private field battleshipO, private field cruiserX, private field cruiserY, private field cruiserO, private field submarineX, private field submarineY, private field submarineO, private field destroyerX, private field destroyerY, private field destroyerO, field shipHash, field targetX, field targetY) -> bool {
+    // combined ship state
+    field shipState = carrierX + carrierY * 16 + carrierO * (16**2) + battleshipX * (16**3) + battleshipY * (16**4) + battleshipO * (16**5) + cruiserX * (16**6) + cruiserY * (16**7) + cruiserO * (16**8) + submarineX * (16**9) + submarineY * (16**10) + submarineO * (16**11) + destroyerX * (16**12) + destroyerY * (16**13) + destroyerO * (16**14);
+
+    // hash check
+    assert(mimc7::<91>(shipState, 0) == shipHash);
+
+    // map check
+    assert(true == (targetX >= 0 && targetX <= 9 && targetY >= 0 && targetY <= 9));
+
+    // hit check and return
+    // true = Hit, false = Missed
+    bool isCarrierHit = (carrierO == 0 && targetX == carrierX && targetY >= carrierY && targetY <= carrierY + 4) || (carrierO == 1 && targetY == carrierY && targetX >= carrierX && targetX <= carrierX + 4);
+
+    bool isBattleshipHit = (battleshipO == 0 && targetX == battleshipX && targetY >= battleshipY && targetY <= battleshipY + 3) || (battleshipO == 1 && targetY == battleshipY && targetX >= battleshipX && targetX <= battleshipX + 3);
+
+    bool isCruiserHit = (cruiserO == 0 && targetX == cruiserX && targetY >= cruiserY && targetY <= cruiserY + 2) || (cruiserO == 1 && targetY == cruiserY && targetX >= cruiserX && targetX <= cruiserX + 2);
+
+    bool isSubmarineHit = (submarineO == 0 && targetX == submarineX && targetY >= submarineY && targetY <= submarineY + 2) || (submarineO == 1 && targetY == submarineY && targetX >= submarineX && targetX <= submarineX + 2);
+
+    bool isDestroyerHit = (destroyerO == 0 && targetX == destroyerX && targetY >= destroyerY && targetY <= destroyerY + 1) || (destroyerO == 1 && targetY == destroyerY && targetX >= destroyerX && targetX <= destroyerX + 1);
+
+    return (isCarrierHit || isBattleshipHit || isCruiserHit || isSubmarineHit || isDestroyerHit);
+}
+
+    
