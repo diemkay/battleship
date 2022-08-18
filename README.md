@@ -9,7 +9,7 @@ Install the ZoKrates CLI:
 curl -Ls https://scrypt.io/scripts/setup-zokrates.sh | sh
 ```
 
-Setup before you run test:
+Setup and check the zkSNARK verifier:
 
 ```
 sh ./scripts/setup.sh

@@ -10,6 +10,14 @@
 
 # production
 /build
+/out
+
+/circuits/*.scrypt
+/circuits/*.key
+/circuits/*.json
+/circuits/*.hex
+/circuits/witness
+/circuits/out*
 
 # misc
 .DS_Store

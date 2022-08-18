@@ -1,0 +1,62 @@
+import "verifier.scrypt";
+
+contract BattleShip {
+    
+    PubKeyHash playerPKH;
+    PubKeyHash computerPKH;
+    
+    int[2] playerBoradHash;
+    int[2] computerBoradHash;
+
+    @state
+    int successfulPlayerHits;
+
+    @state
+    int successfulComputerHits;
+
+    @state
+    bool playerTurn;
+    
+    public function move(int x, int y, int hit, Proof proof, SigHashPreimage txPreimage) {
+        require(Tx.checkPreimage(txPreimage));
+
+        Verifier verifier = new Verifier();
+
+        int h0 = 0;
+        int h1 = 0;
+        if(this.playerTurn) {
+            h0 = this.computerBoradHash[0];
+            h1 = this.computerBoradHash[1];
+            if(hit == 1) {
+                this.successfulPlayerHits++;
+            }
+        } else {
+            h0 = this.playerBoradHash[0];
+            h1 = this.playerBoradHash[1];
+            if(hit == 1) {
+                this.successfulComputerHits++;
+            }
+        }
+
+        require(verifier.unlock([h0, h1, x, y, hit], proof));
+
+        this.playerTurn = !this.playerTurn;
+
+        bytes outputs = b'';
+        int amount = SigHash.value(txPreimage);
+        if(this.successfulPlayerHits == 17) {
+            bytes script = Utils.buildPublicKeyHashScript(this.playerPKH);
+            outputs = Utils.buildOutput(script, amount);
+        } else if(this.successfulComputerHits == 17) {
+            bytes script = Utils.buildPublicKeyHashScript(this.computerPKH);
+            outputs = Utils.buildOutput(script, amount);
+        } else {
+
+            bytes outputScript = this.getStateScript();
+            outputs = Utils.buildOutput(outputScript, amount);
+        }
+
+        // make sure the transaction contains the expected outputs
+        require(hash256(outputs) == SigHash.hashOutputs(txPreimage));
+    }
+}
