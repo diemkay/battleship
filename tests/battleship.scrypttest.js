@@ -3,7 +3,7 @@ const { expect } = require('chai');
 
 const { buildContractClass, bsv, PubKeyHash, toHex, Int, getPreimage } = require('scryptlib');
 
-const { loadDesc, newTx } = require('../helper');
+const { loadDesc, newTx } = require('../src/helper');
 const { hashShips, zokratesProof } = require('../verifier.js');
 
 
