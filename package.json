@@ -6,16 +6,25 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.5.0",
     "@testing-library/user-event": "^7.2.1",
+    "@types/chai": "^4.2.8",
+    "@types/mocha": "^7.0.1",
+    "axios": "^0.27.2",
+    "chai": "^4.2.0",
+    "cross-env": "^7.0.3",
+    "mocha": "^7.0.1",
     "open-color": "^1.7.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "react-scripts": "3.4.1"
+    "react-scripts": "3.4.1",
+    "scryptlib": "^1.0.1",
+    "zokrates-js": "^1.1.1"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "single-test": "cross-env NODE_OPTIONS=--max-old-space-size=8192 mocha --reporter spec --timeout 1200000000"
   },
   "eslintConfig": {
     "extends": "react-app"
