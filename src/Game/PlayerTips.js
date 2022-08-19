@@ -1,4 +1,5 @@
 import React from 'react';
+import { Whatsonchain } from '../web3';
 
 export const PlayerTips = ({
   gameState,
@@ -30,7 +31,7 @@ export const PlayerTips = ({
       <div className="tip-box-title">Stats</div>
       <div id="firing-info">
         <ul>
-          <li>deploy txid: {deployTxid.substr(0, 6)}</li>
+          <li>deploy txid: <a href={Whatsonchain.getTxUri(deployTxid)} target="_blank" rel="noopener noreferrer">{deployTxid.substr(0, 6)}</a></li>
           <li>{numberOfSuccessfulHits} successful hits</li>
           <li>{accuracyScore > 0 ? `${accuracyScore}%` : `0%`} accuracy </li>
         </ul>

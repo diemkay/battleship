@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { PubKeyHash, num2bin, sha256, bin2num,  Int, buildContractClass, } from 'scryptlib';
-import { ContractUtxos, Player, PlayerPKH } from '../storage';
+import { PubKeyHash, num2bin, sha256, bin2num, Int, buildContractClass, bsv, getPreimage, signTx, PubKey } from 'scryptlib';
+import { ContractUtxos, CurrentPlayer, Player, PlayerAddress, PlayerPKH, PlayerPrivkey, PlayerPublicKey } from '../storage';
 import { web3 } from '../web3';
 import Balance from './balance';
 import { GameView } from './GameView';
+//import { newTx } from '../../helper';
 import {
   placeAllComputerShips,
   SQUARE_STATE,
@@ -47,7 +48,7 @@ const AVAILABLE_SHIPS = [
   },
 ];
 
-export const Game = ({desc}) => {
+export const Game = ({ desc }) => {
   const [gameState, setGameState] = useState('placement');
   const [winner, setWinner] = useState(null);
 
@@ -60,7 +61,8 @@ export const Game = ({desc}) => {
   const [hitsByPlayer, setHitsByPlayer] = useState([]);
   const [hitsByComputer, setHitsByComputer] = useState([]);
   const [verifiedHitsByComputer, setVerifiedHitsByComputer] = useState([]); // verified square-index
-  const [battleShipContract, setBattleShipContract] = useState(null); // verified square-index
+  const [verifiedHitsByPlayer, setVerifiedHitsByPlayer] = useState([]); // verified square-index
+  const [battleShipContract, setBattleShipContract] = useState(null); // contract
   const [deployTxid, setDeployTxid] = useState('');
 
   // *** PLAYER ***
@@ -74,6 +76,136 @@ export const Game = ({desc}) => {
       position: null,
     });
   };
+
+  const move = (contractUtxo, x, y, hit, proof, newStates) => {
+
+    console.log('newStates', newStates)
+    web3.call(contractUtxo, (tx) => {
+
+      const newLockingScript = battleShipContract.getNewStateScript(newStates);
+
+      tx.setOutput(0, (tx) => {
+        const amount = contractUtxo.satoshis - tx.getEstimateFee();
+        console.log('amount ', amount)
+        return new bsv.Transaction.Output({
+          script: newLockingScript,
+          satoshis: amount,
+        })
+      })
+
+      tx.setInputScript(0, (tx, output) => {
+        const preimage = getPreimage(tx, output.script, output.satoshis)
+        const currentTurn = !newStates.yourTurn;
+        const privateKey = new bsv.PrivateKey.fromWIF(currentTurn ? PlayerPrivkey.get(Player.You) : PlayerPrivkey.get(Player.Computer));
+        const sig = signTx(tx, privateKey, output.script, output.satoshis)
+
+        let amount = 0;
+        amount = contractUtxo.satoshis - tx.getEstimateFee();
+
+        if (amount < 1) {
+          alert('Not enough funds.');
+          throw new Error('Not enough funds.')
+        }
+
+        // we can verify locally before we broadcast the tx, if fail, 
+        // it will print the launch.json in the brower webview developer tool, just copy/paste,
+        // and try launch the sCrypt debugger
+        // const result = this.props.contractInstance.move(i, sig, amount, preimage).verify({
+        //   inputSatoshis: output.satoshis, tx
+        // })
+
+
+        return battleShipContract.move(sig, x, y, hit, proof, amount, preimage).toScript();
+      })
+        .seal()
+
+
+    }).then(rawTx => {
+      const utxo = ContractUtxos.add(rawTx);
+      console.log(utxo);
+    })
+      .catch(e => {
+        console.error('call contract fail', e)
+      })
+
+  }
+
+  const runZK = async (index, isPlayer, hit, successfulYourHits, successfulComputerHits) => {
+    const privateInputs = toPrivateInputs(isPlayer ? computerShips : placedShips);
+    const position = idx2Pos(index);
+    const publicInputs = [isPlayer ? computerShipsHash : placedShipsHash, position.x.toString(), position.y.toString(), hit];
+
+    console.log('computeWitness', privateInputs.concat(publicInputs).join(' '))
+    console.time("zk")
+    ZKProvider
+      // computer witness for fire result
+      .computeWitness(privateInputs.concat(publicInputs))
+      .then(async ({ witness, output }) => {
+        return ZKProvider.generateProof(witness);
+      })
+      .then(proof => {
+        return {
+          isVerified: ZKProvider.verify(proof),
+          proof: proof
+        }
+      })
+      .then(({
+        proof,
+        isVerified
+      }) => {
+        console.timeEnd("zk")
+        if (isVerified) {
+          // update view
+          if (isPlayer) {
+            setVerifiedHitsByPlayer([...verifiedHitsByPlayer, index])
+          } else {
+            setVerifiedHitsByComputer([...verifiedHitsByComputer, index]);
+          }
+          console.log(`proof of ${index} verified ${isVerified}`)
+          const contractUtxo = ContractUtxos.getlast().utxo;
+
+          const Proof = battleShipContract.getTypeClassByType("Proof");
+          const G1Point = battleShipContract.getTypeClassByType("G1Point");
+          const G2Point = battleShipContract.getTypeClassByType("G2Point");
+          const FQ2 = battleShipContract.getTypeClassByType("FQ2");
+
+
+
+
+          return move(contractUtxo, position.x, position.y, hit, new Proof({
+            a: new G1Point({
+              x: new Int(proof.proof.a[0]),
+              y: new Int(proof.proof.a[1]),
+            }),
+            b: new G2Point({
+              x: new FQ2({
+                x: new Int(proof.proof.b[0][1]),
+                y: new Int(proof.proof.b[0][0]),
+              }),
+              y: new FQ2({
+                x: new Int(proof.proof.b[1][1]),
+                y: new Int(proof.proof.b[1][0]),
+              })
+            }),
+            c: new G1Point({
+              x: new Int(proof.proof.c[0]),
+              y: new Int(proof.proof.c[1]),
+            })
+          }),  {
+            successfulYourHits: successfulYourHits,
+            successfulComputerHits: successfulComputerHits,
+            yourTurn: !isPlayer
+          })
+
+        } else {
+          console.error('proof not verified for ', index);
+        }
+      })
+      .catch(e => {
+        console.timeEnd("zk")
+        console.error('ZKProvider error:', e)
+      })
+  }
 
   const placeShip = (currentlyPlacing) => {
     setPlacedShips([
@@ -102,14 +234,17 @@ export const Game = ({desc}) => {
   };
 
   const startTurn = async () => {
-    generateComputerShips();
+    const computerShips_ = generateComputerShips();
     const BattleShip = buildContractClass(desc);
 
-    const battleShipContract = new BattleShip(new PubKeyHash(PlayerPKH.get(Player.You)),
-                new PubKeyHash(PlayerPKH.get(Player.Computer)),
-                hashShips(placedShips), hashShips(computerShips), 0, 0, true);
+    const playerHash = await shipHash(placedShips);
+    const computerHash = await shipHash(computerShips_);
 
-    const rawTx = await web3.deploy(battleShipContract,  1);
+    const battleShipContract = new BattleShip(new PubKey(PlayerPublicKey.get(Player.You)),
+      new PubKey(PlayerPublicKey.get(Player.Computer)),
+      new Int(playerHash), new Int(computerHash), 0, 0, true);
+
+    const rawTx = await web3.deploy(battleShipContract, 1000);
 
     ContractUtxos.add(rawTx);
 
@@ -120,15 +255,9 @@ export const Game = ({desc}) => {
 
     setGameState('player-turn');
 
-    // calculate ship hashes
-    shipHash(placedShips).then(h => {
-      setPlacedShipsHash(h);
-      console.log('player ship hash: ', h.toString(16))
-    })
-    shipHash(computerShips).then(h => {
-      setComputerShipsHash(h);
-      console.log('computer ship hash: ', h.toString(16))
-    })
+    setPlacedShipsHash(playerHash);
+
+    setComputerShipsHash(computerHash);
   };
 
   const changeTurn = () => {
@@ -141,14 +270,13 @@ export const Game = ({desc}) => {
   const generateComputerShips = () => {
     let placedComputerShips = placeAllComputerShips(AVAILABLE_SHIPS.slice());
 
-    console.log('generateComputerShips', placedComputerShips)
     setComputerShips(placedComputerShips);
+    return placedComputerShips
   };
 
   const computerFire = (index, layout) => {
     let computerHits;
     let fireResult;
-
     if (layout[index] === 'ship') {
       fireResult = {
         position: indexToCoords(index),
@@ -179,32 +307,12 @@ export const Game = ({desc}) => {
     setHitsByComputer(computerHits);
 
     if (fireResult) {
-      const privateInputs = toPrivateInputs(placedShips);
-      const position = idx2Pos(index);
-      const publicInputs = [placedShipsHash, position.x.toString(), position.y.toString()];
 
-      ZKProvider
-        // computer witness for fire result
-        .computeWitness(privateInputs.concat(publicInputs))
-        .then(({ witness, output }) => {
-          console.log('computer out ', output, fireResult, index, new Date())
-          // generate proof
-          return ZKProvider.generateProof(witness);
-        })
-        .then(proof => {
-          console.log('start verifing proof', new Date())
-          // verify proof
-          return ZKProvider.verify(proof);
-        })
-        .then(isVerified => {
-          if(isVerified) {
-            // update view
-            setVerifiedHitsByComputer([...verifiedHitsByComputer, index]);
-            console.log(`proof of ${index} verified ${isVerified}`)
-          } else {
-            console.error('proof not verified for ', index);
-          }
-        });
+      let successfulYourHits = hitsByPlayer.filter((hit) => hit.type === 'hit').length;
+      let successfulComputerHits = computerHits.filter((hit) => hit.type === 'hit')
+        .length;
+
+      //runZK(index, false, layout[index] === 'ship', successfulYourHits, successfulComputerHits)
     }
   };
 
@@ -319,18 +427,22 @@ export const Game = ({desc}) => {
   }
 
   const shipHash = async (ships) => {
-    let multiplier = 1;
+    let multiplier = 1n;
     const shipPreimage =
       sortShipsForZK(ships)
         .reduce(
           (res, ship) => {
             const val = ship.position.x + ship.position.y * 16 + (ship.orientation === "horizontal" ? 1 : 0) * 16 * 16
-            const r = res + val * multiplier;
-            multiplier *= 16 ** 3;
-            return r;
+            // eslint-disable-next-line no-undef
+            const r = BigInt(res) + BigInt(val) * multiplier;
+            // eslint-disable-next-line no-undef
+            multiplier *= BigInt(16 ** 3);
+            // eslint-disable-next-line no-undef
+            return BigInt(r);
           },
           0
         );
+
     const mimc7 = await buildMimc7();
     return mimc7.F.toString(mimc7.hash(shipPreimage, 0));
   }
@@ -405,12 +517,14 @@ export const Game = ({desc}) => {
         placedShips={placedShips}
         startTurn={startTurn}
         computerShips={computerShips}
+        computerShipsHash={computerShipsHash}
         gameState={gameState}
         changeTurn={changeTurn}
         hitsByPlayer={hitsByPlayer}
         setHitsByPlayer={setHitsByPlayer}
         hitsByComputer={hitsByComputer}
         verifiedHitsByComputer={verifiedHitsByComputer}
+        verifiedHitsByPlayer={verifiedHitsByPlayer}
         setHitsByComputer={setHitsByComputer}
         handleComputerTurn={handleComputerTurn}
         checkIfGameOver={checkIfGameOver}
@@ -419,52 +533,9 @@ export const Game = ({desc}) => {
         setComputerShips={setComputerShips}
         playSound={playSound}
         deployTxid={deployTxid}
+        runZK={runZK}
       />
       <Balance></Balance>
     </React.Fragment>
   );
 };
-
-
-
-
-function shipsToWitness(ships, x, y, hit) {
-  let witness = [];
-
-  for (let i = 0; i < ships.length; i++) {
-    const ship = ships[i];
-    witness.push(...ship.map(n => n.toString()));
-  }
-
-  const [h0, h1] = hashShips(ships)
-
-  witness.push([h0.toString(), h1.toString()])
-  witness.push(x.toString())
-  witness.push(y.toString())
-  witness.push(hit)
-
-  console.log('withness', witness.join(' '))
-  return witness;
-}
-
-function reverseHex(r) {
-  return Buffer.from(r, 'hex').reverse().toString('hex')
-}
-
-function hashShips(placedShips) {
-  let sum = 0n;
-  for (let i = 0; i < placedShips.length; i++) {
-    const ship = placedShips[i];
-    // eslint-disable-next-line no-undef
-    sum += BigInt(ship.position.x * Math.pow(16, i * 3) + ship.position.y * Math.pow(16, i * 3 + 1) + (ship.orientation === "horizontal" ? 0 : 1 )* Math.pow(16, i * 3 + 2));
-  }
-
-  const preimage = reverseHex(num2bin(sum, 64))
-
-  const r = sha256(preimage)
-
-  const h0 = bin2num(reverseHex(r).slice(32, 64) + "00")
-  const h1 = bin2num(reverseHex(r).slice(0, 32) + "00")
-
-  return [new Int(h0), new Int(h1)];
-}

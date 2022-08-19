@@ -1,0 +1,56 @@
+
+
+import "hashes/sha256/512bitPacked" as sha256packed;
+
+
+
+def main(private field carrierX, private field carrierY, private field carrierO, private field battleshipX, private field battleshipY, private field battleshipO, private field cruiserX, private field cruiserY, private field cruiserO, private field submarineX, private field submarineY, private field submarineO, private field destroyerX, private field destroyerY, private field destroyerO, field[2] shipHash, field targetX, field targetY, bool hit) {
+
+    // hash check
+    field carrier = carrierX + carrierY * 16 + carrierO * (16**2);
+
+    log("carrier is {}", carrier);
+
+    field battleship = battleshipX * (16**3) + battleshipY * (16**4) + battleshipO * (16**5);
+
+    log("battleship is {}", battleship);
+
+    field cruiser = cruiserX * (16**6) + cruiserY * (16**7) + cruiserO * (16**8);
+
+    log("cruiser is {}", cruiser);
+
+    field submarine = submarineX * (16**9) + submarineY * (16**10) + submarineO * (16**11);
+
+    log("submarine is {}", submarine);
+
+    field destroyer = destroyerX * (16**12) + destroyerY * (16**13) + destroyerO * (16**14);
+
+    log("destroyer is {}", destroyer);
+    
+    field sum = carrier + battleship + cruiser + submarine + destroyer;
+
+    log("sum is {}", sum);
+    
+    field[2] h = sha256packed([0, 0, 0, sum]);
+
+    assert(h[0] == shipHash[0]);
+    assert(h[1] == shipHash[1]);
+    // map check
+    assert(true == (targetX >= 0 && targetX <= 9 && targetY >= 0 && targetY <= 9));
+    // hit check and return
+    // true = Hit, false = Missed
+    // horizontal = 0 
+    bool isCarrierHit = (carrierO == 1 && targetX == carrierX && targetY >= carrierY && targetY <= carrierY + 4) || (carrierO == 0 && targetY == carrierY && targetX >= carrierX && targetX <= carrierX + 4);
+
+    bool isBattleshipHit = (battleshipO == 1 && targetX == battleshipX && targetY >= battleshipY && targetY <= battleshipY + 3) || (battleshipO == 0 && targetY == battleshipY && targetX >= battleshipX && targetX <= battleshipX + 3);
+
+    bool isCruiserHit = (cruiserO == 1 && targetX == cruiserX && targetY >= cruiserY && targetY <= cruiserY + 2) || (cruiserO == 0 && targetY == cruiserY && targetX >= cruiserX && targetX <= cruiserX + 2);
+
+    bool isSubmarineHit = (submarineO == 1 && targetX == submarineX && targetY >= submarineY && targetY <= submarineY + 2) || (submarineO == 0 && targetY == submarineY && targetX >= submarineX && targetX <= submarineX + 2);
+
+    bool isDestroyerHit = (destroyerO == 1 && targetX == destroyerX && targetY >= destroyerY && targetY <= destroyerY + 1) || (destroyerO == 0 && targetY == destroyerY && targetX >= destroyerX && targetX <= destroyerX + 1);
+
+    assert((isCarrierHit || isBattleshipHit || isCruiserHit || isSubmarineHit || isDestroyerHit) == hit);
+
+    return ;
+}

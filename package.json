@@ -21,8 +21,7 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
-    "scryptlib": "^1.0.1",
-    "typescript": "^4.7.4",
+    "scryptlib": "1.0.2-beta1",
     "zokrates-js": "^1.1.1"
   },
   "scripts": {

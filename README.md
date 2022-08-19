@@ -16,6 +16,14 @@ sh ./scripts/setup.sh
 ```
 
 
+Running `verifier.js`.
+
+```
+node --max-old-space-size=8192 verifier.js --run
+```
+
+
+
 ## Credits
 - diemkay's [battleship fontend](https://github.com/diemkay/battleship)
 - Made with [Create React App](https://github.com/facebook/create-react-app).

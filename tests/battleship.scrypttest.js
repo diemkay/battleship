@@ -1,9 +1,9 @@
 const { expect } = require('chai');
 
 
-const { buildContractClass, bsv, PubKeyHash, toHex, Int, getPreimage } = require('scryptlib');
+const { buildContractClass, bsv, PubKeyHash, toHex, Int, getPreimage, PubKey, signTx } = require('scryptlib');
 
-const { loadDesc, newTx } = require('../src/helper');
+const { loadDesc, newTx, inputSatoshis } = require('../helper');
 const { hashShips, zokratesProof } = require('../verifier.js');
 
 
@@ -15,7 +15,6 @@ const pkhPlayer = bsv.crypto.Hash.sha256ripemd160(publicKeyPlayer.toBuffer())
 const privateKeyComputer = new bsv.PrivateKey.fromRandom('testnet')
 const publicKeyComputer = bsv.PublicKey.fromPrivateKey(privateKeyComputer)
 const pkhComputer = bsv.crypto.Hash.sha256ripemd160(publicKeyComputer.toBuffer())
-
 
 
 const playerShips = [
@@ -44,13 +43,15 @@ describe('Test sCrypt contract BattleShip In Javascript', () => {
 
     const BattleShip = buildContractClass(loadDesc('battleship'));
 
-    battleShip = new BattleShip(new PubKeyHash(toHex(pkhPlayer)),
-      new PubKeyHash(toHex(pkhComputer)),
-      hashShips(playerShips), hashShips(computerShips), 0, 0, true)
+    const yourhash = await hashShips(playerShips);
+    const computerhash = await hashShips(computerShips);
+    battleShip = new BattleShip(new PubKey(toHex(publicKeyPlayer)),
+      new PubKey(toHex(publicKeyComputer)),
+      new Int(yourhash), new Int(computerhash), 0, 0, true)
   });
 
 
-  async function testMove(contract, ships, x, y, hit, newStates) {
+  async function testMove(contract, ships, x, y, hit, yourturn, newStates) {
     console.log('generating proof ...')
     const proof = await zokratesProof(ships, x, y, hit);
 
@@ -61,9 +62,11 @@ describe('Test sCrypt contract BattleShip In Javascript', () => {
       satoshis: amount
     }))
 
-    const preimage = getPreimage(tx, contract.lockingScript, amount);
+    const sig = signTx(tx, yourturn ? privateKeyPlayer : privateKeyComputer, contract.lockingScript, inputSatoshis)
 
-    const context = { tx, inputIndex: 0, inputSatoshis: amount }
+    const preimage = getPreimage(tx, contract.lockingScript, inputSatoshis);
+
+    const context = { tx, inputIndex: 0, inputSatoshis: inputSatoshis }
 
     const Proof = contract.getTypeClassByType("Proof");
     const G1Point = contract.getTypeClassByType("G1Point");
@@ -71,7 +74,7 @@ describe('Test sCrypt contract BattleShip In Javascript', () => {
     const FQ2 = contract.getTypeClassByType("FQ2");
 
     console.log('verify ...')
-    const result = contract.move(x, y, hit ? 1 : 0, new Proof({
+    const result = contract.move(sig, x, y, hit , new Proof({
       a: new G1Point({
         x: new Int(proof.proof.a[0]),
         y: new Int(proof.proof.a[1]),
@@ -91,11 +94,11 @@ describe('Test sCrypt contract BattleShip In Javascript', () => {
         y: new Int(proof.proof.c[1]),
       })
 
-    }), preimage).verify(context)
+    }), amount, preimage).verify(context)
 
-    contract.successfulPlayerHits = newStates.successfulPlayerHits;
+    contract.successfulYourHits = newStates.successfulYourHits;
     contract.successfulComputerHits = newStates.successfulComputerHits;
-    contract.playerTurn = newStates.playerTurn;
+    contract.yourTurn = newStates.yourTurn;
 
     return result;
   }
@@ -103,10 +106,10 @@ describe('Test sCrypt contract BattleShip In Javascript', () => {
 
   it('should success when player move x=1, y=1, hit=true', async () => {
 
-    result = await testMove(battleShip, playerShips, 1, 1, true, {
-      successfulPlayerHits: 1,
+    result = await testMove(battleShip, playerShips, 1, 1, true, true, {
+      successfulYourHits: 1,
       successfulComputerHits: 0,
-      playerTurn: false
+      yourTurn: false
     })
 
     // eslint-disable-next-line no-unused-expressions
@@ -117,10 +120,10 @@ describe('Test sCrypt contract BattleShip In Javascript', () => {
 
   it('should success when computer move x=0, y=0, hit=false', async () => {
 
-    result = await testMove(battleShip, playerShips, 0, 0, false, {
-      successfulPlayerHits: 1,
+    result = await testMove(battleShip, playerShips, 0, 0, false,  false,  {
+      successfulYourHits: 1,
       successfulComputerHits: 0,
-      playerTurn: true
+      yourTurn: true
     })
 
     // eslint-disable-next-line no-unused-expressions

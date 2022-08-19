@@ -22,6 +22,7 @@ export const GameView = ({
   setHitsByPlayer,
   hitsByComputer,
   verifiedHitsByComputer,
+  verifiedHitsByPlayer,
   handleComputerTurn,
   checkIfGameOver,
   winner,
@@ -29,6 +30,8 @@ export const GameView = ({
   setComputerShips,
   playSound,
   deployTxid,
+  runZK,
+  computerShipsHash
 }) => {
   return (
     <section id="game-screen">
@@ -67,11 +70,14 @@ export const GameView = ({
         gameState={gameState}
         hitComputer={hitComputer}
         hitsByPlayer={hitsByPlayer}
+        hitsByComputer={hitsByComputer}
         setHitsByPlayer={setHitsByPlayer}
         handleComputerTurn={handleComputerTurn}
         checkIfGameOver={checkIfGameOver}
         setComputerShips={setComputerShips}
+        verifiedHitsByPlayer={verifiedHitsByPlayer}
         playSound={playSound}
+        runZK={runZK}
       />
     </section>
   );

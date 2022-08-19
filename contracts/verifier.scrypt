@@ -1845,8 +1845,8 @@ struct Proof {
 library ZKSNARK {
 
     // Number of inputs.
-    static const int N = 5;
-    static const int N_1 = 6; // N + 1, gamma_abc length
+    static const int N = 4;
+    static const int N_1 = 5; // N + 1, gamma_abc length
 
 
     static function verify(int[ZKSNARK.N] inputs, Proof proof, VerifyingKey vk) : bool {
@@ -1874,53 +1874,50 @@ library ZKSNARK {
 contract Verifier {
 
     static const VerifyingKey vk = {{
-                0x27aa7a296fac1adb6ff78ec68b25281b832b9ee0f0caedcedaf5d05b5ac4f8e4,
-                0x06152b7aa1eb25b4507ddd9eaf570835a93a9962e3d3327196f048e30f1d2cf8
+                0x0999531962e3b9c68ed9b7227322f864d9b2979fc47f5bb8912f55a3f4397a01,
+                0x174611bca02f33fcc3d375e48631f8cabc11f1285d8d64900feb3ce1ff6cd03f
             },{
                 {
-                    0x0ddc7b5d0d2871f0aff4fe635e6dc6af01689b3512eef0579c30e72a6933dc00,
-                    0x2f510a9456531f33e116e870440d3ac9d18219ab9308099a0700c07409dc9969
+                    0x2661bcec1314dfc8fa2b63cc8d62f5279c4f82f1551a25c34033bdc76a6ccbcc,
+                    0x16b98905f6557bb45623c6e0f7194fa14ff9e4162a0abb2c61a93751c5cdac88
                 }, 
                 {
-                    0x109795b8e0690751808b78d12aaa7f7b9784aa3fd34fda382211e75b0b0f00ff,
-                    0x225de7e06cc08e2fca90591aa756a2e13b87d42954b52077a9b2f67782a930d9
+                    0x1030e7d50a8025a063f9af405f2b8e318299394877a1a5df01433838059b3e90,
+                    0x01b3c405822102d5779f6c70ea6ea8f52f1a88cba73c0c9a4d5387643003aa60
                 }
             },{
                 {
-                    0x0bef055a46c58ec427d5814c4f5768cc8a839d04532c2ef96825837e9dff5402,
-                    0x1e66c36855ce7e17f8d46a26dbf6176af05357c2ef7bd9210c657580f131c17a
+                    0x23e7954f8ecacb5f8ad17124650ee60edb0dfc64589c3c33f85de90fabe7ec6c,
+                    0x0deef69f3f5ce4386120ab759cbfcca0806679ef00a77f17b14593346f57751e
                 }, 
                 {
-                    0x1150ec26e6427572617685a0d48274b2aec767a322d6b6d51201fb2f8c04fea5,
-                    0x233d746e593147343a67a27932a86017c931b12ea880874eefcf7f691b8aaef4
+                    0x25bd26e8823cc7cf27d39f6a78f9a1e62ce23e5668726628da6d662a85a1f3d7,
+                    0x154db5e4cbc9e433d3fa48ed70811965984386d75321f839bd992e71fd50ee1b
                 }
             },{
                 {
-                    0x035f41102de2e6dfe5287504e50acc7bf503c441e158d0147117a2081c82b25b,
-                    0x2d0094aa7c26f46c8f3cb71c32a49ce98db27216d15b965d58b79c492f19fa8a
+                    0x22562652ffeb567b97a5f98ab40907a9f43c2f9e393aae88088d484cf922321b,
+                    0x28da606a45a9e04baf7c313e7f24d22f4d80365a955390c8257c7768a14d3602
                 }, 
                 {
-                    0x0eda6691cb0e2a9d4959c54dfd201691a3d09562b6960682cb5f8e144cbefa7c,
-                    0x25bc86e32ebf45915250eea9ffca7a611150f0d14bdd1c90395ec200b59fbfec
+                    0x25401485d4019104556deb8997564f1b92e2baa94455088566e9733ff228c803,
+                    0x023ccde6d8c91cca2af10ff179d36b6fc0747aacc7749883676e108ee16ae34d
                 }
             },[{
-                0x2d27207bb98f90b5840136b55997a38fc7692a127af69d7fa1938ec38665e286,
-                0x043cc723ba78b2c82247acc36aa08d991b95dc7a3ba692c1a0fc63ae593c1dc0
+                0x248b6801fd199a3db773a6a7b9d215a67f58496ad4726d2edefe3cf1051cda8e,
+                0x023a132677d0b1fc5e8996060e1b591238e9a6343b5bae65dc9cd4acbec829f5
             },{
-                0x07dda695c4beaa1b5d3e6442c68a2187def507a5f93437feffc62e4a8d5fcbe1,
-                0x10400ddf96a6d7b7b221a322aaeef8c782a09f51d499a181f1dae5111de35be2
+                0x12c715e324cba5ded94fdfec2602f955e9c19621c9976ffbc4e5469daaae8191,
+                0x06dee8454ed9b2029e882633f41ab79ec7c8f33e7ff7419385090abb3857b11b
             },{
-                0x09d373c22d7901f90db2588d7fe751a89086ab841c95fdc0b1dbb259a864608f,
-                0x21aff91023d2e5f7641ff351cab8c22be5043c2c3807bb7c969708b86fb01eb1
+                0x20c0dfdb06e175901765f7f54fe4abeba9efba934a0d1547b744a15c59237baf,
+                0x0e28037687243a464b1740fae8cd6d7c085d8b4b79d74fc6e046ba1be8160cee
             },{
-                0x02be88f6aca7c3079aa90cccd55ec471015130a1ab8a990921d3e614af2b7ca3,
-                0x132a8a89a5935f777488431733d4930a60cdb725151be8148d7696c5cd7b1b64
+                0x2a2bdb1b97947c90c10d84cf1363764e39167a3b8d0a3b26e91057dff2126b42,
+                0x02cb5935638d16c8df5d4a3ca1a1b161f32b30183134ce15ad234daf0fe6e326
             },{
-                0x0f505668d1b4783cce45ff7c49c66be87035a68ee108090ea3811111ec33061a,
-                0x03f534bbc89351420d93947ef2dd59610ffa3136a466138e147eabfa7807a0f6
-            },{
-                0x29bf961b7dd4434a0771be1a319bbfcb8c58e5291be6dbb75cb988d2c59bb90f,
-                0x07e66a0fae53b76c37fc37da7b8fac6a6eeabca5342cbfed95c403505cb3065c
+                0x1d185c13ea5329a0847d8b6443411f448b48fc661ec86004b1352bd1cb60303e,
+                0x0bb963285324ac750805fc28b305955627b42ee062cdbdbab33568a20713fdeb
             }]};
 
     public function unlock(int[ZKSNARK.N] inputs, Proof proof) {

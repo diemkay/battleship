@@ -1,56 +1,57 @@
 import "verifier.scrypt";
 
 contract BattleShip {
-    
-    PubKeyHash playerPKH;
-    PubKeyHash computerPKH;
-    
-    int[2] playerBoradHash;
-    int[2] computerBoradHash;
+
+    PubKey you;
+    PubKey computer;
+
+    int yourHash;
+    int computerHash;
 
     @state
-    int successfulPlayerHits;
+    int successfulYourHits;
 
     @state
     int successfulComputerHits;
 
     @state
-    bool playerTurn;
-    
-    public function move(int x, int y, int hit, Proof proof, SigHashPreimage txPreimage) {
+    bool yourTurn;
+
+    public function move(Sig sig, int x, int y, bool hit, Proof proof, int amount, SigHashPreimage txPreimage)
+     {
         require(Tx.checkPreimage(txPreimage));
 
         Verifier verifier = new Verifier();
 
-        int h0 = 0;
-        int h1 = 0;
-        if(this.playerTurn) {
-            h0 = this.computerBoradHash[0];
-            h1 = this.computerBoradHash[1];
-            if(hit == 1) {
-                this.successfulPlayerHits++;
+        PubKey pubKey = this.yourTurn ? this.you : this.computer;
+        require(checkSig(sig, pubKey));
+        if (this.yourTurn) {
+
+            if (hit) {
+                this.successfulYourHits++;
             }
-        } else {
-            h0 = this.playerBoradHash[0];
-            h1 = this.playerBoradHash[1];
-            if(hit == 1) {
+        }
+        else {
+
+            if (hit) {
                 this.successfulComputerHits++;
             }
         }
 
-        require(verifier.unlock([h0, h1, x, y, hit], proof));
+        //require(verifier.unlock([h0, h1, x, y, hit], proof));
 
-        this.playerTurn = !this.playerTurn;
+        this.yourTurn = !this.yourTurn;
 
         bytes outputs = b'';
-        int amount = SigHash.value(txPreimage);
-        if(this.successfulPlayerHits == 17) {
-            bytes script = Utils.buildPublicKeyHashScript(this.playerPKH);
+        if (this.successfulYourHits == 17) {
+            bytes script = Utils.buildPublicKeyHashScript(hash160(this.you));
             outputs = Utils.buildOutput(script, amount);
-        } else if(this.successfulComputerHits == 17) {
-            bytes script = Utils.buildPublicKeyHashScript(this.computerPKH);
+        }
+        else if (this.successfulComputerHits == 17) {
+            bytes script = Utils.buildPublicKeyHashScript(hash160(this.computer));
             outputs = Utils.buildOutput(script, amount);
-        } else {
+        }
+        else {
 
             bytes outputScript = this.getStateScript();
             outputs = Utils.buildOutput(outputScript, amount);

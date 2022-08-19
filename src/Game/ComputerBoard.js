@@ -12,11 +12,14 @@ export const ComputerBoard = ({
   computerShips,
   gameState,
   hitsByPlayer,
+  hitsByComputer,
   setHitsByPlayer,
   handleComputerTurn,
   checkIfGameOver,
   setComputerShips,
   playSound,
+  runZK,
+  verifiedHitsByPlayer
 }) => {
   // Ships on an empty layout
   let compLayout = computerShips.reduce(
@@ -82,7 +85,7 @@ export const ComputerBoard = ({
           stateToClass[square] === 'hit' ||
           stateToClass[square] === 'miss' ||
           stateToClass[square] === 'ship-sunk'
-            ? `square ${stateToClass[square]}`
+            ? `square ${stateToClass[square]} ${verifiedHitsByPlayer.indexOf(index) > -1 ? 'verified' : ''}`
             : `square`
         }
         key={`comp-square-${index}`}
@@ -90,8 +93,9 @@ export const ComputerBoard = ({
         onClick={() => {
           if (playerCanFire && !alreadyHit(index)) {
 
-            console.log('click index=', index)
             const newHits = fireTorpedo(index);
+
+
             const shipsWithSunkFlag = updateSunkShips(newHits, computerShips);
             const sunkShipsAfter = shipsWithSunkFlag.filter((ship) => ship.sunk).length;
             const sunkShipsBefore = computerShips.filter((ship) => ship.sunk).length;
@@ -99,8 +103,16 @@ export const ComputerBoard = ({
               playSound('sunk');
             }
 
-            console.log('setComputerShips 1', shipsWithSunkFlag)
             setComputerShips(shipsWithSunkFlag);
+
+            let indexWasHit = compLayout[index] === 'ship'
+          
+            let successfulYourHits = newHits.filter((hit) => hit.type === 'hit').length;
+            let successfulComputerHits = hitsByComputer.filter((hit) => hit.type === 'hit')
+              .length;
+
+            runZK(index, true, indexWasHit, successfulYourHits, successfulComputerHits)
+
             handleComputerTurn();
           }
         }}

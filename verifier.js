@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
 const { initialize } = require('zokrates-js');
+const { buildMimc7 } = require('circomlibjs');
 
 const playerShips = [
   [7, 1, 1],
@@ -19,17 +20,20 @@ async function zokratesProof(ships, x, y, hit) {
 
   const zokratesProvider = await initialize()
 
-  const source = fs.readFileSync(path.join(__dirname, 'circuits', 'battleship.zok')).toString()
+  const program = fs.readFileSync(path.join(__dirname, 'circuits', 'out'));
+  let abi = JSON.parse(fs.readFileSync(path.join(__dirname, 'circuits', 'abi.json')).toString());
 
-  const artifacts = zokratesProvider.compile(source);
 
   // computation
-  const { witness } = zokratesProvider.computeWitness(artifacts, shipsToWitness(ships, x, y, hit));
+  const { witness } = zokratesProvider.computeWitness({
+    program: program,
+    abi: abi
+  }, await shipsToWitness(ships, x, y, hit));
 
   const provingkey = fs.readFileSync(path.join(__dirname, 'circuits', 'proving.key')).toJSON().data
   const verificationkey = JSON.parse(fs.readFileSync(path.join(__dirname, 'circuits', 'verification.key')).toString())
 
-  const proof = zokratesProvider.generateProof(artifacts.program, witness, provingkey);
+  const proof = zokratesProvider.generateProof(program, witness, provingkey);
 
   // or verify off-chain
   const isVerified = zokratesProvider.verify(verificationkey, proof);
@@ -91,7 +95,7 @@ async function run() {
 }
 
 
-function shipsToWitness(ships, x, y, hit) {
+async function  shipsToWitness(ships, x, y, hit) {
   let witness = [];
 
   for (let i = 0; i < ships.length; i++) {
@@ -99,9 +103,9 @@ function shipsToWitness(ships, x, y, hit) {
     witness.push(...ship.map(n => n.toString()));
   }
 
-  const [h0, h1] = hashShips(ships)
+  const hash = await hashShips(ships)
 
-  witness.push([h0.toString(), h1.toString()])
+  witness.push(hash)
   witness.push(x.toString())
   witness.push(y.toString())
   witness.push(hit)
@@ -114,23 +118,17 @@ function reverseHex(r) {
   return Buffer.from(r, 'hex').reverse().toString('hex')
 }
 
-function hashShips(placedShips) {
+async function hashShips(placedShips) {
 
-  let sum = 0n;
+  let shipPreimage = 0n;
   for (let i = 0; i < placedShips.length; i++) {
     const ship = placedShips[i];
     // eslint-disable-next-line no-undef
-    sum += BigInt(ship[0] * Math.pow(16, i * 3) + ship[1] * Math.pow(16, i * 3 + 1) + ship[2] * Math.pow(16, i * 3 + 2));
+    shipPreimage += BigInt(ship[0] * Math.pow(16, i * 3) + ship[1] * Math.pow(16, i * 3 + 1) + ship[2] * Math.pow(16, i * 3 + 2));
   }
 
-  const preimage = reverseHex(num2bin(sum, 64))
-
-  const r = sha256(preimage)
-
-  const h0 = bin2num(reverseHex(r).slice(32, 64) + "00")
-  const h1 = bin2num(reverseHex(r).slice(0, 32) + "00")
-
-  return [new Int(h0), new Int(h1)];
+  const mimc7 = await buildMimc7();
+  return mimc7.F.toString(mimc7.hash(shipPreimage, 0));
 }
 
 
