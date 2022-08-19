@@ -16,6 +16,7 @@ export const PlayerBoard = ({
   placeShip,
   placedShips,
   hitsByComputer,
+  verifiedHitsByComputer,
   playSound,
 }) => {
   // Player ships on empty layout
@@ -65,7 +66,7 @@ export const PlayerBoard = ({
             placeShip(currentlyPlacing);
           }
         }}
-        className={`square ${stateToClass[square]}`}
+        className={`square ${stateToClass[square]} ${verifiedHitsByComputer.indexOf(index) > -1 ? 'verified' : ''}`}
         key={`square-${index}`}
         id={`square-${index}`}
         onMouseOver={() => {

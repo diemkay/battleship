@@ -12,6 +12,9 @@ import {
   coordsToIndex,
 } from './layoutHelpers';
 
+import { buildMimc7 } from 'circomlibjs';
+import { ZKProvider } from '../zkProvider';
+
 const AVAILABLE_SHIPS = [
   {
     name: 'carrier',
@@ -46,10 +49,13 @@ export const Game = () => {
 
   const [currentlyPlacing, setCurrentlyPlacing] = useState(null);
   const [placedShips, setPlacedShips] = useState([]);
+  const [placedShipsHash, setPlacedShipsHash] = useState([]);
   const [availableShips, setAvailableShips] = useState(AVAILABLE_SHIPS);
   const [computerShips, setComputerShips] = useState([]);
+  const [computerShipsHash, setComputerShipsHash] = useState([]);
   const [hitsByPlayer, setHitsByPlayer] = useState([]);
   const [hitsByComputer, setHitsByComputer] = useState([]);
+  const [verifiedHitsByComputer, setVerifiedHitsByComputer] = useState([]); // verified square-index
 
   // *** PLAYER ***
   const selectShip = (shipName) => {
@@ -92,6 +98,16 @@ export const Game = () => {
   const startTurn = () => {
     generateComputerShips();
     setGameState('player-turn');
+
+    // calculate ship hashes
+    shipHash(placedShips).then(h => {
+      setPlacedShipsHash(h);
+      console.log('player ship hash: ', h.toString(16))
+    })
+    shipHash(computerShips).then(h => {
+      setComputerShipsHash(h);
+      console.log('computer ship hash: ', h.toString(16))
+    })
   };
 
   const changeTurn = () => {
@@ -108,23 +124,26 @@ export const Game = () => {
 
   const computerFire = (index, layout) => {
     let computerHits;
+    let fireResult;
 
     if (layout[index] === 'ship') {
+      fireResult = {
+        position: indexToCoords(index),
+        type: SQUARE_STATE.hit,
+      };
       computerHits = [
         ...hitsByComputer,
-        {
-          position: indexToCoords(index),
-          type: SQUARE_STATE.hit,
-        },
+        fireResult,
       ];
     }
     if (layout[index] === 'empty') {
+      fireResult = {
+        position: indexToCoords(index),
+        type: SQUARE_STATE.miss,
+      }
       computerHits = [
         ...hitsByComputer,
-        {
-          position: indexToCoords(index),
-          type: SQUARE_STATE.miss,
-        },
+        fireResult,
       ];
     }
     const sunkShips = updateSunkShips(computerHits, placedShips);
@@ -135,7 +154,43 @@ export const Game = () => {
     }
     setPlacedShips(sunkShips);
     setHitsByComputer(computerHits);
+
+    if (fireResult) {
+      const privateInputs = toPrivateInputs(placedShips);
+      const position = idx2Pos(index);
+      const publicInputs = [placedShipsHash, position.x.toString(), position.y.toString()];
+
+      ZKProvider
+        // computer witness for fire result
+        .computeWitness(privateInputs.concat(publicInputs))
+        .then(({ witness, output }) => {
+          console.log('computer out ', output, fireResult, index, new Date())
+          // generate proof
+          return ZKProvider.generateProof(witness);
+        })
+        .then(proof => {
+          console.log('start verifing proof', new Date())
+          // verify proof
+          return ZKProvider.verify(proof);
+        })
+        .then(isVerified => {
+          if(isVerified) {
+            // update view
+            setVerifiedHitsByComputer([...verifiedHitsByComputer, index]);
+            console.log(`proof of ${index} verified ${isVerified}`)
+          } else {
+            console.error('proof not verified for ', index);
+          }
+        });
+    }
   };
+
+  const idx2Pos = (index) => {
+    return {
+      x: index % 10,
+      y: Math.floor(index / 10)
+    }
+  }
 
   // Change to computer turn, check if game over and stop if yes; if not fire into an eligible square
   const handleComputerTurn = () => {
@@ -230,7 +285,45 @@ export const Game = () => {
     setComputerShips([]);
     setHitsByPlayer([]);
     setHitsByComputer([]);
+    setVerifiedHitsByComputer([]);
   };
+
+
+  const sortShipsForZK = (ships) => {
+    const SORTED_ZK_SHIP_NAMES = ['carrier', 'battleship', 'cruiser', 'submarine', 'destoryer'];
+    return ships.sort((a, b) => SORTED_ZK_SHIP_NAMES.indexOf(a) - SORTED_ZK_SHIP_NAMES.indexOf(b))
+  }
+
+  const shipHash = async (ships) => {
+    let multiplier = 1;
+    const shipPreimage =
+      sortShipsForZK(ships)
+        .reduce(
+          (res, ship) => {
+            const val = ship.position.x + ship.position.y * 16 + (ship.orientation === "horizontal" ? 1 : 0) * 16 * 16
+            const r = res + val * multiplier;
+            multiplier *= 16 ** 3;
+            return r;
+          },
+          0
+        );
+    const mimc7 = await buildMimc7();
+    return mimc7.F.toString(mimc7.hash(shipPreimage, 0));
+  }
+
+  const toPrivateInputs = (ships) => {
+    return sortShipsForZK(ships)
+      .reduce(
+        (res, ship) => {
+          return res.concat([
+            ship.position.x.toString(),
+            ship.position.y.toString(),
+            ship.orientation === "horizontal" ? '1' : '0'
+          ]);
+        },
+        []
+      )
+  }
 
   const sunkSoundRef = useRef(null);
   const clickSoundRef = useRef(null);
@@ -293,6 +386,7 @@ export const Game = () => {
         hitsByPlayer={hitsByPlayer}
         setHitsByPlayer={setHitsByPlayer}
         hitsByComputer={hitsByComputer}
+        verifiedHitsByComputer={verifiedHitsByComputer}
         setHitsByComputer={setHitsByComputer}
         handleComputerTurn={handleComputerTurn}
         checkIfGameOver={checkIfGameOver}

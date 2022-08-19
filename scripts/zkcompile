@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# exit when any command fails
+set -e
+
+# compile
+zokrates compile --input zk/battleship.zok
+
+# perform the setup phase
+zokrates setup
+
+# mv output files to public folder
+mv out abi.json verification.key proving.key public/zk/
+
+# rm out.r1cs
+rm out.r1cs

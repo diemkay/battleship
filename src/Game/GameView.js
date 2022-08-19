@@ -21,6 +21,7 @@ export const GameView = ({
   hitsByPlayer,
   setHitsByPlayer,
   hitsByComputer,
+  verifiedHitsByComputer,
   handleComputerTurn,
   checkIfGameOver,
   winner,
@@ -55,6 +56,7 @@ export const GameView = ({
         placeShip={placeShip}
         placedShips={placedShips}
         hitsByComputer={hitsByComputer}
+        verifiedHitsByComputer={verifiedHitsByComputer}
         playSound={playSound}
       />
       <ComputerBoard

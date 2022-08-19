@@ -90,3 +90,10 @@
   background-color: var(--oc-red-2);
   border: 1px solid var(--oc-red-3);
 }
+
+.board .verified {
+  background-image: url('/verified.png');
+  background-size: 80%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
