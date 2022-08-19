@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { PubKeyHash, num2bin, sha256, bin2num,  Int, buildContractClass, } from 'scryptlib';
-import { Player, PlayerPKH } from '../storage';
+import { ContractUtxos, Player, PlayerPKH } from '../storage';
 import { web3 } from '../web3';
 import Balance from './balance';
 import { GameView } from './GameView';
@@ -61,7 +61,7 @@ export const Game = ({desc}) => {
   const [hitsByComputer, setHitsByComputer] = useState([]);
   const [verifiedHitsByComputer, setVerifiedHitsByComputer] = useState([]); // verified square-index
   const [battleShipContract, setBattleShipContract] = useState(null); // verified square-index
-
+  const [deployTxid, setDeployTxid] = useState('');
 
   // *** PLAYER ***
   const selectShip = (shipName) => {
@@ -101,7 +101,7 @@ export const Game = ({desc}) => {
     }
   };
 
-  const startTurn = () => {
+  const startTurn = async () => {
     generateComputerShips();
     const BattleShip = buildContractClass(desc);
 
@@ -109,7 +109,14 @@ export const Game = ({desc}) => {
                 new PubKeyHash(PlayerPKH.get(Player.Computer)),
                 hashShips(placedShips), hashShips(computerShips), 0, 0, true);
 
-    setBattleShipContract(battleShipContract)
+    const rawTx = await web3.deploy(battleShipContract,  1);
+
+    ContractUtxos.add(rawTx);
+
+    const txid = ContractUtxos.getdeploy().utxo.txId
+
+    setDeployTxid(txid)
+    setBattleShipContract(battleShipContract);
 
     setGameState('player-turn');
 
@@ -302,6 +309,7 @@ export const Game = ({desc}) => {
     setHitsByPlayer([]);
     setHitsByComputer([]);
     setVerifiedHitsByComputer([]);
+    ContractUtxos.clear();
   };
 
 
@@ -410,6 +418,7 @@ export const Game = ({desc}) => {
         winner={winner}
         setComputerShips={setComputerShips}
         playSound={playSound}
+        deployTxid={deployTxid}
       />
       <Balance></Balance>
     </React.Fragment>

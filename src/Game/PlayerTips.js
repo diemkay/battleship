@@ -6,6 +6,7 @@ export const PlayerTips = ({
   hitsByComputer,
   startAgain,
   winner,
+  deployTxid,
 }) => {
   let numberOfHits = hitsbyPlayer.length;
   let numberOfSuccessfulHits = hitsbyPlayer.filter((hit) => hit.type === 'hit').length;
@@ -29,6 +30,7 @@ export const PlayerTips = ({
       <div className="tip-box-title">Stats</div>
       <div id="firing-info">
         <ul>
+          <li>deploy txid: {deployTxid.substr(0, 6)}</li>
           <li>{numberOfSuccessfulHits} successful hits</li>
           <li>{accuracyScore > 0 ? `${accuracyScore}%` : `0%`} accuracy </li>
         </ul>

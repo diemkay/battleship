@@ -8,6 +8,8 @@ import { ZKProvider } from './zkProvider';
 
 import './css/style.css';
 import { SensiletWallet, web3 } from './web3';
+import { initPlayer } from './storage';
+
 
 export const App = () => {
   const [appState, setAppState] = useState('welcome'); // play or welcome
@@ -53,4 +55,5 @@ export const App = () => {
   );
 };
 
+initPlayer();
 ReactDOM.render(<App />, document.getElementById('root'));

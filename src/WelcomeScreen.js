@@ -14,10 +14,11 @@ export const WelcomeScreen = ({ startPlay, desc, setDesc }) => {
 
     if(!desc) {
       fetchContract().then(desc => {
-        console.log(desc)
         setDesc(desc)
-        console.log('asdfasdfasdf')
         setLoading(false)
+      })
+      .catch(e => {
+        console.error('load desc error:', e)
       })
     }
   });

@@ -28,6 +28,7 @@ export const GameView = ({
   startAgain,
   setComputerShips,
   playSound,
+  deployTxid,
 }) => {
   return (
     <section id="game-screen">
@@ -37,6 +38,7 @@ export const GameView = ({
           hitsbyPlayer={hitsByPlayer}
           hitsByComputer={hitsByComputer}
           winner={winner}
+          deployTxid={deployTxid}
           startAgain={startAgain}
         />
       ) : (
