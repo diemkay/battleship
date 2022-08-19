@@ -57,7 +57,9 @@ export const Game = () => {
   const [hitsByPlayer, setHitsByPlayer] = useState([]);
   const [hitsByComputer, setHitsByComputer] = useState([]);
   const [verifiedHitsByComputer, setVerifiedHitsByComputer] = useState([]); // verified square-index
+  const [battleShipContract, setBattleShipContract] = useState(null); // verified square-index
 
+  
   // *** PLAYER ***
   const selectShip = (shipName) => {
     let shipIdx = availableShips.findIndex((ship) => ship.name === shipName);
