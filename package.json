@@ -26,11 +26,12 @@
     "zokrates-js": "^1.1.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "single-test": "cross-env NODE_OPTIONS=--max-old-space-size=8192 mocha --reporter spec --timeout 1200000000"
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test",
+    "eject": "react-app-rewired eject",
+    "single-test": "cross-env NODE_OPTIONS=--max-old-space-size=8192 mocha --reporter spec --timeout 1200000000",
+    "zkcompile": "scripts/zkcompile"
   },
   "eslintConfig": {
     "extends": "react-app"

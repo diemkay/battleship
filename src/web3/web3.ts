@@ -19,18 +19,11 @@ export class web3 {
   }
 
 
-  static loadContract(url: string): Promise<{
-    contractClass: typeof AbstractContract,
-    types: Record<string, typeof ScryptType>
-  }> {
+  static loadContractDesc(url: string): Promise<any> {
     return axios.get(url, {
       timeout: 10000
     }).then(res => {
-      const contractClass = buildContractClass(res.data);
-      return {
-        contractClass: contractClass,
-        types: buildTypeClasses(contractClass)
-      };
+      return res.data;
     });
   }
 

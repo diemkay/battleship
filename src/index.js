@@ -12,6 +12,8 @@ import { SensiletWallet, web3 } from './web3';
 export const App = () => {
   const [appState, setAppState] = useState('welcome'); // play or welcome
 
+  const [desc, setDesc] = useState(null); // play or welcome
+
   const startPlay = async () => {
 
     const wallet =  new SensiletWallet();
@@ -45,7 +47,7 @@ export const App = () => {
   return (
     <React.Fragment>
       <Header />
-      {appState === 'play' ? <Game /> : <WelcomeScreen startPlay={startPlay} />}
+      {appState === 'play' ? <Game desc={desc}/> : <WelcomeScreen startPlay={startPlay} desc={desc} setDesc={setDesc} />}
       <Footer />
     </React.Fragment>
   );

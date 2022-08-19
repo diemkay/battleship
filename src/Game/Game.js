@@ -1,4 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { PubKeyHash, num2bin, sha256, bin2num,  Int, buildContractClass, } from 'scryptlib';
+import { Player, PlayerPKH } from '../storage';
+import { web3 } from '../web3';
 import Balance from './balance';
 import { GameView } from './GameView';
 import {
@@ -44,7 +47,7 @@ const AVAILABLE_SHIPS = [
   },
 ];
 
-export const Game = () => {
+export const Game = ({desc}) => {
   const [gameState, setGameState] = useState('placement');
   const [winner, setWinner] = useState(null);
 
@@ -59,7 +62,7 @@ export const Game = () => {
   const [verifiedHitsByComputer, setVerifiedHitsByComputer] = useState([]); // verified square-index
   const [battleShipContract, setBattleShipContract] = useState(null); // verified square-index
 
-  
+
   // *** PLAYER ***
   const selectShip = (shipName) => {
     let shipIdx = availableShips.findIndex((ship) => ship.name === shipName);
@@ -100,6 +103,14 @@ export const Game = () => {
 
   const startTurn = () => {
     generateComputerShips();
+    const BattleShip = buildContractClass(desc);
+
+    const battleShipContract = new BattleShip(new PubKeyHash(PlayerPKH.get(Player.You)),
+                new PubKeyHash(PlayerPKH.get(Player.Computer)),
+                hashShips(placedShips), hashShips(computerShips), 0, 0, true);
+
+    setBattleShipContract(battleShipContract)
+
     setGameState('player-turn');
 
     // calculate ship hashes
@@ -404,3 +415,47 @@ export const Game = () => {
     </React.Fragment>
   );
 };
+
+
+
+
+function shipsToWitness(ships, x, y, hit) {
+  let witness = [];
+
+  for (let i = 0; i < ships.length; i++) {
+    const ship = ships[i];
+    witness.push(...ship.map(n => n.toString()));
+  }
+
+  const [h0, h1] = hashShips(ships)
+
+  witness.push([h0.toString(), h1.toString()])
+  witness.push(x.toString())
+  witness.push(y.toString())
+  witness.push(hit)
+
+  console.log('withness', witness.join(' '))
+  return witness;
+}
+
+function reverseHex(r) {
+  return Buffer.from(r, 'hex').reverse().toString('hex')
+}
+
+function hashShips(placedShips) {
+  let sum = 0n;
+  for (let i = 0; i < placedShips.length; i++) {
+    const ship = placedShips[i];
+    // eslint-disable-next-line no-undef
+    sum += BigInt(ship.position.x * Math.pow(16, i * 3) + ship.position.y * Math.pow(16, i * 3 + 1) + (ship.orientation === "horizontal" ? 0 : 1 )* Math.pow(16, i * 3 + 2));
+  }
+
+  const preimage = reverseHex(num2bin(sum, 64))
+
+  const r = sha256(preimage)
+
+  const h0 = bin2num(reverseHex(r).slice(32, 64) + "00")
+  const h1 = bin2num(reverseHex(r).slice(0, 32) + "00")
+
+  return [new Int(h0), new Int(h1)];
+}
