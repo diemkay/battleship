@@ -1,4 +1,6 @@
 import React from 'react';
+import { ContractUtxos } from '../storage';
+import { Whatsonchain } from '../web3';
 import {
   stateToClass,
   generateEmptyLayout,
@@ -19,7 +21,8 @@ export const ComputerBoard = ({
   setComputerShips,
   playSound,
   runZK,
-  verifiedHitsByPlayer
+  verifiedHitsByPlayer,
+  processingHitsByPlayer
 }) => {
   // Ships on an empty layout
   let compLayout = computerShips.reduce(
@@ -85,7 +88,7 @@ export const ComputerBoard = ({
           stateToClass[square] === 'hit' ||
           stateToClass[square] === 'miss' ||
           stateToClass[square] === 'ship-sunk'
-            ? `square ${stateToClass[square]} ${verifiedHitsByPlayer.indexOf(index) > -1 ? 'verified' : ''}`
+            ? `square ${stateToClass[square]} ${processingHitsByPlayer.indexOf(index) > -1 ? 'processing' : (verifiedHitsByPlayer.indexOf(index) > -1 ? 'verified' : '')}`
             : `square`
         }
         key={`comp-square-${index}`}
@@ -94,7 +97,6 @@ export const ComputerBoard = ({
           if (playerCanFire && !alreadyHit(index)) {
 
             const newHits = fireTorpedo(index);
-
 
             const shipsWithSunkFlag = updateSunkShips(newHits, computerShips);
             const sunkShipsAfter = shipsWithSunkFlag.filter((ship) => ship.sunk).length;
@@ -114,6 +116,15 @@ export const ComputerBoard = ({
             runZK(index, true, indexWasHit, successfulYourHits, successfulComputerHits)
 
             handleComputerTurn();
+          } else if(verifiedHitsByPlayer.indexOf(index) > -1) {
+
+            const utxo = ContractUtxos.getPlayerUtxoByIndex(index);
+      
+            if(utxo) {
+              window.open(Whatsonchain.getTxUri(utxo.utxo.txId), '_blank').focus();
+            } else {
+              console.error('utxo not found for index: ', index)
+            }
           }
         }}
       />

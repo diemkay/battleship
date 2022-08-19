@@ -96,4 +96,13 @@
   background-size: 80%;
   background-repeat: no-repeat;
   background-position: center;
+  cursor: pointer;
+}
+
+.board .processing {
+  background-image: url('/loading.gif');
+  background-size: 80%;
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: progress;
 }

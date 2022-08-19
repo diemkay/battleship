@@ -31,7 +31,8 @@ export const GameView = ({
   playSound,
   deployTxid,
   runZK,
-  computerShipsHash
+  processingHitsByPlayer,
+  processingHitsByComputer
 }) => {
   return (
     <section id="game-screen">
@@ -62,6 +63,7 @@ export const GameView = ({
         placedShips={placedShips}
         hitsByComputer={hitsByComputer}
         verifiedHitsByComputer={verifiedHitsByComputer}
+        processingHitsByComputer={processingHitsByComputer}
         playSound={playSound}
       />
       <ComputerBoard
@@ -76,6 +78,7 @@ export const GameView = ({
         checkIfGameOver={checkIfGameOver}
         setComputerShips={setComputerShips}
         verifiedHitsByPlayer={verifiedHitsByPlayer}
+        processingHitsByPlayer={processingHitsByPlayer}
         playSound={playSound}
         runZK={runZK}
       />

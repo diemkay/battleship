@@ -95,16 +95,18 @@ export const GameData = {
 
 // store all utxos related to the contract
 export const ContractUtxos = {
-  add: (rawTx, outputIndex = 0) => {
+  add: (rawTx, player, index = 0) => {
     const tx = new bsv.Transaction(rawTx);
     const utxos = ContractUtxos.get();
     const utxo = {
       utxo: {
         txId: tx.id,
-        outputIndex: outputIndex,
-        satoshis: tx.outputs[outputIndex].satoshis,
-        script: tx.outputs[outputIndex].script.toHex()
+        outputIndex: 0,
+        satoshis: tx.outputs[0].satoshis,
+        script: tx.outputs[0].script.toHex()
       },
+      index: index,
+      player: player,
       rawTx: rawTx
     };
     utxos.push(utxo)
@@ -115,6 +117,20 @@ export const ContractUtxos = {
   get: () => {
     const utxosStr = localStorage[`utxos`];
     return utxosStr ? JSON.parse(utxosStr) : [];
+  },
+
+  getComputerUtxoByIndex: (index) => {
+    const utxos = ContractUtxos.get();
+    return utxos.find(utxo => {
+      return utxo.index === index && !utxo.player;
+    })
+  },
+
+  getPlayerUtxoByIndex: (index) => {
+    const utxos = ContractUtxos.get();
+    return utxos.find(utxo => {
+      return utxo.index === index && utxo.player;
+    })
   },
   set: (utxos) => {
     localStorage.setItem(`utxos`, JSON.stringify(utxos));

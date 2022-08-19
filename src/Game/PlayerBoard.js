@@ -1,4 +1,6 @@
 import React from 'react';
+import { ContractUtxos } from '../storage';
+import { Whatsonchain } from '../web3';
 import {
   SQUARE_STATE,
   stateToClass,
@@ -17,6 +19,7 @@ export const PlayerBoard = ({
   placedShips,
   hitsByComputer,
   verifiedHitsByComputer,
+  processingHitsByComputer,
   playSound,
 }) => {
   // Player ships on empty layout
@@ -56,7 +59,11 @@ export const PlayerBoard = ({
     }
   }
 
+
+
+
   let squares = layout.map((square, index) => {
+
     return (
       <div
         onMouseDown={rotateShip}
@@ -64,9 +71,16 @@ export const PlayerBoard = ({
           if (canPlaceCurrentShip) {
             playSound('click');
             placeShip(currentlyPlacing);
+          } else if(verifiedHitsByComputer.indexOf(index) > -1) {
+            const utxo = ContractUtxos.getComputerUtxoByIndex(index);
+            if(utxo) {
+              window.open(Whatsonchain.getTxUri(utxo.utxo.txId), '_blank').focus();
+            } else {
+              console.error('utxo not found for index: ', index)
+            }
           }
         }}
-        className={`square ${stateToClass[square]} ${verifiedHitsByComputer.indexOf(index) > -1 ? 'verified' : ''}`}
+        className={`square ${stateToClass[square]} ${processingHitsByComputer.indexOf(index) > -1 ? 'processing' : (verifiedHitsByComputer.indexOf(index) > -1 ? 'verified' : '')}`}
         key={`square-${index}`}
         id={`square-${index}`}
         onMouseOver={() => {

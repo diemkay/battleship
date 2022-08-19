@@ -60,6 +60,8 @@ export const Game = ({ desc }) => {
   const [computerShipsHash, setComputerShipsHash] = useState([]);
   const [hitsByPlayer, setHitsByPlayer] = useState([]);
   const [hitsByComputer, setHitsByComputer] = useState([]);
+  const [processingHitsByComputer, setProcessingHitsByComputer] = useState([]); // processing square-index
+  const [processingHitsByPlayer, setProcessingHitsByPlayer] = useState([]); // processing square-index
   const [verifiedHitsByComputer, setVerifiedHitsByComputer] = useState([]); // verified square-index
   const [verifiedHitsByPlayer, setVerifiedHitsByPlayer] = useState([]); // verified square-index
   const [battleShipContract, setBattleShipContract] = useState(null); // contract
@@ -77,7 +79,7 @@ export const Game = ({ desc }) => {
     });
   };
 
-  const move = (contractUtxo, x, y, hit, proof, newStates) => {
+  const move = (isPlayer, index, contractUtxo, x, y, hit, proof, newStates) => {
 
     console.log('newStates', newStates)
     web3.call(contractUtxo, (tx) => {
@@ -121,7 +123,7 @@ export const Game = ({ desc }) => {
 
 
     }).then(rawTx => {
-      const utxo = ContractUtxos.add(rawTx);
+      const utxo = ContractUtxos.add(rawTx, isPlayer, index);
       console.log(utxo);
     })
       .catch(e => {
@@ -134,6 +136,12 @@ export const Game = ({ desc }) => {
     const privateInputs = toPrivateInputs(isPlayer ? computerShips : placedShips);
     const position = idx2Pos(index);
     const publicInputs = [isPlayer ? computerShipsHash : placedShipsHash, position.x.toString(), position.y.toString(), hit];
+
+    if (isPlayer) {
+      setProcessingHitsByPlayer([...processingHitsByPlayer, index])
+    } else {
+      setProcessingHitsByComputer([...processingHitsByComputer, index]);
+    }
 
     console.log('computeWitness', privateInputs.concat(publicInputs).join(' '))
     console.time("zk")
@@ -156,11 +164,6 @@ export const Game = ({ desc }) => {
         console.timeEnd("zk")
         if (isVerified) {
           // update view
-          if (isPlayer) {
-            setVerifiedHitsByPlayer([...verifiedHitsByPlayer, index])
-          } else {
-            setVerifiedHitsByComputer([...verifiedHitsByComputer, index]);
-          }
           console.log(`proof of ${index} verified ${isVerified}`)
           const contractUtxo = ContractUtxos.getlast().utxo;
 
@@ -170,9 +173,7 @@ export const Game = ({ desc }) => {
           const FQ2 = battleShipContract.getTypeClassByType("FQ2");
 
 
-
-
-          return move(contractUtxo, position.x, position.y, hit, new Proof({
+          return move(isPlayer, index, contractUtxo, position.x, position.y, hit, new Proof({
             a: new G1Point({
               x: new Int(proof.proof.a[0]),
               y: new Int(proof.proof.a[1]),
@@ -191,7 +192,7 @@ export const Game = ({ desc }) => {
               x: new Int(proof.proof.c[0]),
               y: new Int(proof.proof.c[1]),
             })
-          }),  {
+          }), {
             successfulYourHits: successfulYourHits,
             successfulComputerHits: successfulComputerHits,
             yourTurn: !isPlayer
@@ -200,6 +201,28 @@ export const Game = ({ desc }) => {
         } else {
           console.error('proof not verified for ', index);
         }
+      })
+      .then(() => {
+        // UPDATE UI
+        if (isPlayer) {
+
+          const i = processingHitsByPlayer.indexOf(index);
+          if (i > -1) {
+            processingHitsByPlayer.splice(i, 1);
+          }
+
+          setProcessingHitsByPlayer(processingHitsByPlayer)
+          setVerifiedHitsByPlayer([...verifiedHitsByPlayer, index])
+        } else {
+
+          const i = processingHitsByComputer.indexOf(index);
+          if (i > -1) {
+            processingHitsByComputer.splice(i, 1);
+          }
+          setProcessingHitsByComputer(processingHitsByComputer)
+          setVerifiedHitsByComputer([...verifiedHitsByComputer, index]);
+        }
+
       })
       .catch(e => {
         console.timeEnd("zk")
@@ -246,7 +269,7 @@ export const Game = ({ desc }) => {
 
     const rawTx = await web3.deploy(battleShipContract, 1000);
 
-    ContractUtxos.add(rawTx);
+    ContractUtxos.add(rawTx, 0, -1);
 
     const txid = ContractUtxos.getdeploy().utxo.txId
 
@@ -308,11 +331,16 @@ export const Game = ({ desc }) => {
 
     if (fireResult) {
 
+
+
       let successfulYourHits = hitsByPlayer.filter((hit) => hit.type === 'hit').length;
       let successfulComputerHits = computerHits.filter((hit) => hit.type === 'hit')
         .length;
 
-      //runZK(index, false, layout[index] === 'ship', successfulYourHits, successfulComputerHits)
+      setTimeout(() => {
+        runZK(index, false, layout[index] === 'ship', successfulYourHits, successfulComputerHits)
+      }, 60*1000);
+      
     }
   };
 
@@ -525,6 +553,8 @@ export const Game = ({ desc }) => {
         hitsByComputer={hitsByComputer}
         verifiedHitsByComputer={verifiedHitsByComputer}
         verifiedHitsByPlayer={verifiedHitsByPlayer}
+        processingHitsByPlayer={processingHitsByPlayer}
+        processingHitsByComputer={processingHitsByComputer}
         setHitsByComputer={setHitsByComputer}
         handleComputerTurn={handleComputerTurn}
         checkIfGameOver={checkIfGameOver}
