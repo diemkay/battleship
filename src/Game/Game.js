@@ -79,47 +79,33 @@ export const Game = ({ desc }) => {
     });
   };
 
-  const move = (isPlayer, index, contractUtxo, x, y, hit, proof, newStates) => {
+  const move = async (isPlayer, index, contractUtxo, x, y, hit, proof, newStates) => {
 
     console.log('newStates', newStates)
-    web3.call(contractUtxo, (tx) => {
+
+    const changeAddress = await web3.getChangeAddress();
+
+    web3.call(contractUtxo, async (tx) => {
 
       const newLockingScript = battleShipContract.getNewStateScript(newStates);
 
       tx.setOutput(0, (tx) => {
-        const amount = contractUtxo.satoshis - tx.getEstimateFee();
-        console.log('amount ', amount)
         return new bsv.Transaction.Output({
           script: newLockingScript,
-          satoshis: amount,
+          satoshis: 1,
         })
       })
-
-      tx.setInputScript(0, (tx, output) => {
-        const preimage = getPreimage(tx, output.script, output.satoshis)
+      .setInputScript(0, (tx, output) => {
+        const Signature = bsv.crypto.Signature
+        const preimage = getPreimage(tx, output.script, output.satoshis, 0, Signature.SIGHASH_SINGLE | Signature.SIGHASH_FORKID)
         const currentTurn = !newStates.yourTurn;
         const privateKey = new bsv.PrivateKey.fromWIF(currentTurn ? PlayerPrivkey.get(Player.You) : PlayerPrivkey.get(Player.Computer));
-        const sig = signTx(tx, privateKey, output.script, output.satoshis)
+        const sig = signTx(tx, privateKey, output.script, output.satoshis, 0, Signature.SIGHASH_SINGLE | Signature.SIGHASH_FORKID)
 
-        let amount = 0;
-        amount = contractUtxo.satoshis - tx.getEstimateFee();
-
-        if (amount < 1) {
-          alert('Not enough funds.');
-          throw new Error('Not enough funds.')
-        }
-
-        // we can verify locally before we broadcast the tx, if fail, 
-        // it will print the launch.json in the brower webview developer tool, just copy/paste,
-        // and try launch the sCrypt debugger
-        // const result = this.props.contractInstance.move(i, sig, amount, preimage).verify({
-        //   inputSatoshis: output.satoshis, tx
-        // })
-
-
-        return battleShipContract.move(sig, x, y, hit, proof, amount, preimage).toScript();
+        return battleShipContract.move(sig, x, y, hit, proof, preimage).toScript();
       })
-        .seal()
+      .change(changeAddress)
+      .seal();
 
 
     }).then(rawTx => {
@@ -142,10 +128,9 @@ export const Game = ({ desc }) => {
     } else {
       setProcessingHitsByComputer([...processingHitsByComputer, index]);
     }
-
-    console.log('computeWitness', privateInputs.concat(publicInputs).join(' '))
+    
     console.time("zk")
-    ZKProvider
+    return ZKProvider
       // computer witness for fire result
       .computeWitness(privateInputs.concat(publicInputs))
       .then(async ({ witness, output }) => {
@@ -226,7 +211,7 @@ export const Game = ({ desc }) => {
       })
       .catch(e => {
         console.timeEnd("zk")
-        console.error('ZKProvider error:', e)
+        console.error('processing error:', e)
       })
   }
 
@@ -257,24 +242,37 @@ export const Game = ({ desc }) => {
   };
 
   const startTurn = async () => {
+
     const computerShips_ = generateComputerShips();
     const BattleShip = buildContractClass(desc);
 
     const playerHash = await shipHash(placedShips);
     const computerHash = await shipHash(computerShips_);
 
-    const battleShipContract = new BattleShip(new PubKey(PlayerPublicKey.get(Player.You)),
+    const contract = new BattleShip(new PubKey(PlayerPublicKey.get(Player.You)),
       new PubKey(PlayerPublicKey.get(Player.Computer)),
       new Int(playerHash), new Int(computerHash), 0, 0, true);
 
-    const rawTx = await web3.deploy(battleShipContract, 1000);
+    setBattleShipContract(contract);
 
-    ContractUtxos.add(rawTx, 0, -1);
+    try {
 
-    const txid = ContractUtxos.getdeploy().utxo.txId
+      ContractUtxos.clear();
 
-    setDeployTxid(txid)
-    setBattleShipContract(battleShipContract);
+      const rawTx = await web3.deploy(contract, 1);
+
+      ContractUtxos.add(rawTx, 0, -1);
+  
+      const txid = ContractUtxos.getdeploy().utxo.txId
+  
+      setDeployTxid(txid)
+    } catch (error) {
+      console.error("deploy contract fails", error);
+      setBattleShipContract(null);
+      alert("deploy contract error:" + error.message);
+      return;
+    }
+
 
     setGameState('player-turn');
 
@@ -340,7 +338,6 @@ export const Game = ({ desc }) => {
       setTimeout(() => {
         runZK(index, false, layout[index] === 'ship', successfulYourHits, successfulComputerHits)
       }, 60*1000);
-      
     }
   };
 

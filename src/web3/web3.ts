@@ -44,7 +44,7 @@ export class web3 {
     const changeAddress = await web3.wallet.getRawChangeAddress();
 
     return wallet.listUnspent(amountInContract, {
-      purpose: 'tic-tac-toe'
+      purpose: 'listUnspent'
     }).then((utxos: UTXO[]) => {
       if(utxos.length === 0) {
         throw new Error('no utxo available')
@@ -65,9 +65,8 @@ export class web3 {
   }
 
   static async call(contractUtxo: UTXO,
-    cbBuildTx: (tx: bsv.Transaction) => void,
+    cbBuildTx: (tx: bsv.Transaction) => Promise<void>,
   ): Promise<string> {
-    const wallet = web3.wallet
     const tx = new bsv.Transaction();
     tx.addInput(new bsv.Transaction.Input({
       prevTxId: contractUtxo.txId,
@@ -77,11 +76,19 @@ export class web3 {
         script: contractUtxo.script,
         satoshis: contractUtxo.satoshis,
       })
-    }))
+    }));
 
-    cbBuildTx(tx);
+    const utxos = await web3.wallet.listUnspent(1, {
+      purpose: 'listUnspent'
+    });
 
-    const rawTx = tx.toString();
+    tx.from(utxos.slice(0, 1)); // only use first utxo to make code simple
+
+    await cbBuildTx(tx);
+
+
+    const rawTx = await  web3.wallet.signRawTransaction(tx.toString(), utxos[0].script, utxos[0].satoshis, 1, SignType.ALL);
+
     await web3.sendRawTx(rawTx);
     return rawTx;
   }

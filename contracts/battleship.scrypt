@@ -17,9 +17,9 @@ contract BattleShip {
     @state
     bool yourTurn;
 
-    public function move(Sig sig, int x, int y, bool hit, Proof proof, int amount, SigHashPreimage txPreimage)
-     {
-        require(Tx.checkPreimage(txPreimage));
+    public function move(Sig sig, int x, int y, bool hit, Proof proof, SigHashPreimage txPreimage)
+    {
+        require(Tx.checkPreimageSigHashType(txPreimage, SigHash.SINGLE | SigHash.FORKID));
 
         Verifier verifier = new Verifier();
 
@@ -43,6 +43,7 @@ contract BattleShip {
         this.yourTurn = !this.yourTurn;
 
         bytes outputs = b'';
+        int amount = SigHash.value(txPreimage);
         if (this.successfulYourHits == 17) {
             bytes script = Utils.buildPublicKeyHashScript(hash160(this.you));
             outputs = Utils.buildOutput(script, amount);
