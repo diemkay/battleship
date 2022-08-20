@@ -66,6 +66,7 @@ export const Game = ({ desc }) => {
   const [verifiedHitsByPlayer, setVerifiedHitsByPlayer] = useState([]); // verified square-index
   const [battleShipContract, setBattleShipContract] = useState(null); // contract
   const [deployTxid, setDeployTxid] = useState('');
+  const [balance, setBalance] = useState(-1);
 
   // *** PLAYER ***
   const selectShip = (shipName) => {
@@ -108,9 +109,16 @@ export const Game = ({ desc }) => {
       .seal();
 
 
-    }).then(rawTx => {
-      const utxo = ContractUtxos.add(rawTx, isPlayer, index);
-      console.log(utxo);
+    }).then(async rawTx => {
+      ContractUtxos.add(rawTx, isPlayer, index);
+
+      setTimeout(async () => {
+        web3.wallet.getbalance().then(balance => {
+          console.log('update balance:', balance)
+          setBalance(balance)
+        })
+      }, 1000);
+
     })
       .catch(e => {
         console.error('call contract fail', e)
@@ -266,6 +274,13 @@ export const Game = ({ desc }) => {
       const txid = ContractUtxos.getdeploy().utxo.txId
   
       setDeployTxid(txid)
+
+      setTimeout(async () => {
+        web3.wallet.getbalance().then(balance => {
+          console.log('update balance:', balance)
+          setBalance(balance)
+        })
+      }, 1000);
     } catch (error) {
       console.error("deploy contract fails", error);
       setBattleShipContract(null);
@@ -562,7 +577,7 @@ export const Game = ({ desc }) => {
         deployTxid={deployTxid}
         runZK={runZK}
       />
-      <Balance></Balance>
+      <Balance balance={balance}></Balance>
     </React.Fragment>
   );
 };
