@@ -93,7 +93,7 @@ export const ComputerBoard = ({
         }
         key={`comp-square-${index}`}
         id={`comp-square-${index}`}
-        onClick={() => {
+        onClick={async () => {
           if (playerCanFire && !alreadyHit(index)) {
 
             const newHits = fireTorpedo(index);
@@ -113,9 +113,12 @@ export const ComputerBoard = ({
             let successfulComputerHits = hitsByComputer.filter((hit) => hit.type === 'hit')
               .length;
 
-            runZK(index, true, indexWasHit, successfulYourHits, successfulComputerHits)
+            await runZK(index, true, indexWasHit, successfulYourHits, successfulComputerHits)
 
-            handleComputerTurn();
+            setTimeout(() => {
+              handleComputerTurn();
+            }, 10000);
+            
           } else if(verifiedHitsByPlayer.indexOf(index) > -1) {
 
             const utxo = ContractUtxos.getPlayerUtxoByIndex(index);

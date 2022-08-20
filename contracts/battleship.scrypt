@@ -38,7 +38,7 @@ contract BattleShip {
             }
         }
 
-        //require(verifier.unlock([h0, h1, x, y, hit], proof));
+        //require(verifier.unlock([this.yourTurn ? this.computerHash : this.yourHash, x, y, hit ? 1 : 0], proof));
 
         this.yourTurn = !this.yourTurn;
 

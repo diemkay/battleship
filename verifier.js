@@ -6,6 +6,7 @@ const path = require('path');
 const assert = require('assert');
 const { initialize } = require('zokrates-js');
 const { buildMimc7 } = require('circomlibjs');
+const { loadDesc } = require('./helper');
 
 const playerShips = [
   [7, 1, 1],
@@ -48,15 +49,11 @@ async function run() {
 
   console.log('generating proof ...')
 
-  const proof  = await zokratesProof(playerShips, 1, 1, true);
+  const proof  = await zokratesProof(playerShips, 0, 0, false);
 
   console.log('compiling contract ...')
 
-  const Verifier = buildContractClass(compileContract(path.join(__dirname, 'contracts', 'verifier.scrypt'), {
-    out: path.join(__dirname, 'out'),
-    sourceMap: false,
-    desc: true
-  }));
+  const Verifier = buildContractClass(loadDesc('verifier'));
 
   const { Proof, G1Point, G2Point, FQ2 } = buildTypeClasses(Verifier);
   const verifier = new Verifier();
@@ -71,12 +68,12 @@ async function run() {
       }),
       b: new G2Point({
         x: new FQ2({
-          x: new Int(proof.proof.b[0][1]),
-          y: new Int(proof.proof.b[0][0]),
+          x: new Int(proof.proof.b[0][0]),
+          y: new Int(proof.proof.b[0][1]),
         }),
         y: new FQ2({
-          x: new Int(proof.proof.b[1][1]),
-          y: new Int(proof.proof.b[1][0]),
+          x: new Int(proof.proof.b[1][0]),
+          y: new Int(proof.proof.b[1][1]),
         })
       }),
       c: new G1Point({

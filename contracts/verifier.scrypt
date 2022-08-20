@@ -780,28 +780,34 @@ library BN256 {
     }
         
     static function mulCurvePoint(CurvePoint a, int m) : CurvePoint {
-        // Double and add method.
-        // Lowest bit to highest.
-        CurvePoint t =   {0, 0, 0, 0};
-        CurvePoint sum = {0, 0, 0, 0};
+       CurvePoint res = {0, 1, 0, 0};
 
-        bytes mb = reverseBytes(num2bin(m, S), S);
-        bool firstOne = false;
+        if (m != 0) {
+            // Double and add method.
+            // Lowest bit to highest.
+            CurvePoint t =   {0, 0, 0, 0};
+            CurvePoint sum = {0, 0, 0, 0};
 
-        loop (CURVE_BITS_P8) : i {
-            if (firstOne) {
-                t = doubleCurvePoint(sum);
+            bytes mb = reverseBytes(num2bin(m, S), S);
+            bool firstOne = false;
+
+            loop (CURVE_BITS_P8) : i {
+                if (firstOne) {
+                    t = doubleCurvePoint(sum);
+                }
+
+                if ((mb & (mask << ((CURVE_BITS_P8 - 1) - i))) != zero) {
+                    firstOne = true;
+                    sum = addCurvePoints(t, a);
+                } else {
+                    sum = t;
+                }
             }
 
-            if ((mb & (mask << ((CURVE_BITS_P8 - 1) - i))) != zero) {
-                firstOne = true;
-                sum = addCurvePoints(t, a);
-            } else {
-                sum = t;
-            }
+            res = sum;
         }
 
-        return sum;
+        return res;
     }
 
     static function makeAffineCurvePoint(CurvePoint a) : CurvePoint {
@@ -840,7 +846,11 @@ library BN256 {
     }
 
     static function createCurvePoint(G1Point ccp) : CurvePoint {
-        return {ccp.x, ccp.y, 1, 1}; 
+        CurvePoint res = {0, 1, 0, 0};
+        if (ccp != {0, 1}) {
+            res = {ccp.x, ccp.y, 1, 1};
+        }
+        return res;
     }
 
     static function getG1Point(CurvePoint cp) : G1Point {
@@ -1052,7 +1062,11 @@ library BN256 {
     }
 
     static function createTwistPoint(G2Point ctp) : TwistPoint {
-        return {ctp.x, ctp.y, {0, 1}, {0, 1}}; 
+        TwistPoint res = {FQ2Zero, FQ2One, FQ2Zero, FQ2Zero};
+        if (ctp != {FQ2Zero, FQ2One}) {
+            res = {{ctp.x.y, ctp.x.x}, {ctp.y.y, ctp.y.x}, FQ2One, FQ2One}; 
+        }
+        return res;
     }
 
     static function getG2Point(TwistPoint tp) : G2Point {
@@ -1874,50 +1888,50 @@ library ZKSNARK {
 contract Verifier {
 
     static const VerifyingKey vk = {{
-                0x298185c5f66806b230d99563b9694e14ef38a01341fa36e5a1f7dea3bec4d1f8,
-                0x2f06291702510622cd117e87978c656b6787ca4d0549552bd159b977414986ba
+                0x11452daebcafee6ba349aa26693698756bc7d265894d272e07227cf43505756d,
+                0x1951176841772112b0ebe282bfd4d06167970f9c241143b500fc7a1d8056cf88
             },{
                 {
-                    0x204cb4f5d6f06fa1c71677af797edb31b4ff49f71084b4778a73768362eb2493,
-                    0x0053aeaf01f08826c51d20a9fbdb361af52dca86a77f48e85e59862627eb6359
+                    0x2e397d710279f2bee07a24cd5f21fd6e9a40d491013f22f8c12c3f8cfc7dc5b0,
+                    0x1354f4a17fd2b181881e7f6a067f8f59e0a02e61c1871ce9c5000fa2eb952907
                 }, 
                 {
-                    0x2a52f5ce2057f66cea07c34cfe77b49995da869d19787ec6a6e79c8195b07e25,
-                    0x17966278b0048815aa4fda041fa003468a005e38fa8441914765997a020949ac
+                    0x0ec06dc8d264f0dd8154786636a3f1dca5c7ba6c61a3e14688ee414b20bcbe04,
+                    0x0924419bcac168b0e8c601ae06fa404a4779c38137eb62704063eca5c9d4c19f
                 }
             },{
                 {
-                    0x1c632eee5c3269ee8fd43defe59dcf8599b0f0fa790ada4cb4addda663b01f43,
-                    0x2a28b4954ee59afd2d3b3b09d610d3bcf451fb56c0a719819bc307882e2aaa90
+                    0x16c37f7053631cb81671534d1a30b53d0c0ff0639251e3c7099a1c9cb08e7db8,
+                    0x2b7c38eb9f7a490ac9b80dd8344fddf58a8f414cf5b8820777f36751c41134e3
                 }, 
                 {
-                    0x2e715259606341e01916effb18c45b649142a9a5931eb86ee96d22b11b72db86,
-                    0x1baaf218e33aef338ad8cb57fca9551d05e58cb18c8f027fcca6fee57083191f
+                    0x11f7edacb48109dcdc12b00536afd35755016775cb8f20603ba548bfaa065259,
+                    0x1f19c654bb5b3b8d03e55f96076ad02bc69f60b0cca8abb38e24b8a2526e14e8
                 }
             },{
                 {
-                    0x01aa688cc4d9f835c2e7f2b0e1d35a3eda171420c1c4011a090ae53ef09d57a3,
-                    0x1a1be3582815529bcca9375be68a311665f3085a3f1277e7f9179e7ea972e777
+                    0x2d07a25ba317ee78b245fea1774404061ed1643438625468d51359d2ac41124c,
+                    0x0844fb2aa83dd28604390d93460a105cc0a7253a1ba799e6d2a5bc2510c1bc98
                 }, 
                 {
-                    0x2350b7906181e7402e60f16c79df89c544bdea65fd234473c3c1eba2805bb496,
-                    0x2b5a389d83ade11fc21c7b211871ef7abb34e5e07746d1676b9a1acc209bd287
+                    0x0dc82c34ace4a8d6b6908cafec029a1ee9ebc25836545cf59cad1c48c57dec23,
+                    0x1462b68546ecdbdc44f5958b40f720e1ce22f28f4ce9538431f6f1ada7297a4b
                 }
             },[{
-                0x21e7d2de3291df0c1694d9bc28e3d7154e0da81703cc30fb5c13176e86a4b5f8,
-                0x19549d2638da7514b7a00779b316c5ee38dd8592fd1636b79c54aff05023f93e
+                0x16b695966449f02a02c226b7c82be2c2e275a1e93d0b295fbf7542f0a0f6eeb2,
+                0x2d357eaba3660c69b372f80bf6608736f0c736abd591c97a80fcb28135ec2818
             },{
-                0x0518352025f7352fe61b8531820f9f2364b442f0a20df8a16e8e3b1d8c36a533,
-                0x2632169bb2fcbb0afacddc73db06431064242d01cb75f3ca286cac13ad44c6d0
+                0x0e6651cab096faf9c18be5e0f87f7e5a03aefb51773cef798d3ecff006357696,
+                0x2d709d08abec6dc7a73b0706ebe6246b4c771ca078402c22d8ec293d9bc6aa78
             },{
-                0x10feb352a0a98e28ded82664539b4591626c0f2bdcdc8881f08414cdc434e4e2,
-                0x182b8795080fba564681422ebc3e8b9fc7a0c019b1aa6377a18efebed338202a
+                0x0b580a0179e1c151a0d9a096e784eeb57d13e92f5d8d6e94ae47e47d82416893,
+                0x283b1890182290285cc455c0dfb53acae49cd2db30cfbc5620f034a9213a019a
             },{
-                0x02e17eb7b391af2df6c2688154a9edcfbde06c95f09744ef6e381d37d817f909,
-                0x231ea01111632fe03e04731bf0afd89640ec10c6cd3afac067e247bc6c862a47
+                0x24f6d559d40a81b24864e5ef10ec74ec41f862f0513e742778b8e50a0b45f0c9,
+                0x07b43c91434aab4836dae706042175cf89a0a4c6dd6df147b2073e6bbab2ef5a
             },{
-                0x0f287b31317095c52fddbc4bde0b7f7c652a6b323e515ac4b3c53d759ca4045f,
-                0x24d8053f55abd77bdd2f1933467b313c07d3333977605858670cdbcd563876eb
+                0x17815912e7d7fbc7bd6a9141ee02b7ab14cd2d0890802a0f0b95549afa1e8cf6,
+                0x0bb657cb4b31ef10201f36c1bc77e1988463d074cec233c29df02633c793fd22
             }]};
 
     public function unlock(int[ZKSNARK.N] inputs, Proof proof) {

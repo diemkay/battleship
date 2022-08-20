@@ -2,7 +2,7 @@
     "version": 9,
     "compilerVersion": "1.17.1+commit.3385a0d",
     "contract": "BattleShip",
-    "md5": "9a7de73274daf3e0035258c8ac4214da",
+    "md5": "beaf958971eecf14a155f7c06aa14c46",
     "structs": [
         {
             "name": "FQ2",

@@ -6,16 +6,12 @@ const { buildContractClass, bsv, PubKeyHash, toHex, Int, getPreimage, PubKey, si
 const { loadDesc, newTx, inputSatoshis } = require('../helper');
 const { hashShips, zokratesProof } = require('../verifier.js');
 
-
+const Signature = bsv.crypto.Signature
 const privateKeyPlayer = new bsv.PrivateKey.fromRandom('testnet')
 const publicKeyPlayer = bsv.PublicKey.fromPrivateKey(privateKeyPlayer)
-const pkhPlayer = bsv.crypto.Hash.sha256ripemd160(publicKeyPlayer.toBuffer())
-
 
 const privateKeyComputer = new bsv.PrivateKey.fromRandom('testnet')
 const publicKeyComputer = bsv.PublicKey.fromPrivateKey(privateKeyComputer)
-const pkhComputer = bsv.crypto.Hash.sha256ripemd160(publicKeyComputer.toBuffer())
-
 
 const playerShips = [
   [7, 1, 1],
@@ -59,12 +55,12 @@ describe('Test sCrypt contract BattleShip In Javascript', () => {
 
     tx.addOutput(new bsv.Transaction.Output({
       script: contract.getNewStateScript(newStates),
-      satoshis: amount
+      satoshis: inputSatoshis
     }))
 
-    const sig = signTx(tx, yourturn ? privateKeyPlayer : privateKeyComputer, contract.lockingScript, inputSatoshis)
+    const sig = signTx(tx, yourturn ? privateKeyPlayer : privateKeyComputer, contract.lockingScript, inputSatoshis, 0, Signature.SIGHASH_SINGLE | Signature.SIGHASH_FORKID)
 
-    const preimage = getPreimage(tx, contract.lockingScript, inputSatoshis);
+    const preimage = getPreimage(tx, contract.lockingScript, inputSatoshis, 0, Signature.SIGHASH_SINGLE | Signature.SIGHASH_FORKID);
 
     const context = { tx, inputIndex: 0, inputSatoshis: inputSatoshis }
 
@@ -81,12 +77,12 @@ describe('Test sCrypt contract BattleShip In Javascript', () => {
       }),
       b: new G2Point({
         x: new FQ2({
-          x: new Int(proof.proof.b[0][1]),
-          y: new Int(proof.proof.b[0][0]),
+          x: new Int(proof.proof.b[0][0]),
+          y: new Int(proof.proof.b[0][1]),
         }),
         y: new FQ2({
-          x: new Int(proof.proof.b[1][1]),
-          y: new Int(proof.proof.b[1][0]),
+          x: new Int(proof.proof.b[1][0]),
+          y: new Int(proof.proof.b[1][1]),
         })
       }),
       c: new G1Point({
@@ -94,7 +90,7 @@ describe('Test sCrypt contract BattleShip In Javascript', () => {
         y: new Int(proof.proof.c[1]),
       })
 
-    }), amount, preimage).verify(context)
+    }), preimage).verify(context)
 
     contract.successfulYourHits = newStates.successfulYourHits;
     contract.successfulComputerHits = newStates.successfulComputerHits;

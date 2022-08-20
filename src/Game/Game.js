@@ -144,9 +144,9 @@ export const Game = ({ desc }) => {
       .then(async ({ witness, output }) => {
         return ZKProvider.generateProof(witness);
       })
-      .then(proof => {
+      .then(async proof => {
         return {
-          isVerified: ZKProvider.verify(proof),
+          isVerified: await ZKProvider.verify(proof),
           proof: proof
         }
       })
@@ -350,9 +350,7 @@ export const Game = ({ desc }) => {
       let successfulComputerHits = computerHits.filter((hit) => hit.type === 'hit')
         .length;
 
-      setTimeout(() => {
-        runZK(index, false, layout[index] === 'ship', successfulYourHits, successfulComputerHits)
-      }, 60*1000);
+      runZK(index, false, layout[index] === 'ship', successfulYourHits, successfulComputerHits)
     }
   };
 
