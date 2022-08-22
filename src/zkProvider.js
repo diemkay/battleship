@@ -12,15 +12,14 @@ export class ZKProvider {
   }
 
   static async init() {
-    if (ZKProvider.instance) return;
-
+    // console.log('ZKP init...')
+    if (ZKProvider.instance) return ZKProvider;
     try {
       let zokratesProvider = await initialize();
       let program = await fetch('/zk/out').then(resp => resp.arrayBuffer()).then(data => new Uint8Array(data));
       let abi = await fetch('/zk/abi.json').then(resp => resp.json());
       let proving_key = await fetch('/zk/proving.key').then(resp => resp.arrayBuffer()).then(data => new Uint8Array(data));
       let verification_key = await fetch('/zk/verification.key').then(resp => resp.json());
-
       ZKProvider.instance = new ZKProvider(
         zokratesProvider,
         program,
@@ -28,11 +27,11 @@ export class ZKProvider {
         proving_key,
         verification_key
       )
+      // console.log('ZKP initialized.')
+      return ZKProvider;
     } catch (error) {
       console.log('init ZKProvider fail', error)
     }
-
-
   }
 
   static computeWitness(args) {

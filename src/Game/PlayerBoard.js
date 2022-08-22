@@ -18,8 +18,7 @@ export const PlayerBoard = ({
   placeShip,
   placedShips,
   hitsByComputer,
-  verifiedHitsByComputer,
-  processingHitsByComputer,
+  hitsProofToComputer,
   playSound,
 }) => {
   // Player ships on empty layout
@@ -63,7 +62,7 @@ export const PlayerBoard = ({
 
 
   let squares = layout.map((square, index) => {
-
+    const hitProofStatus = hitsProofToComputer.get(index);
     return (
       <div
         onMouseDown={rotateShip}
@@ -71,7 +70,7 @@ export const PlayerBoard = ({
           if (canPlaceCurrentShip) {
             playSound('click');
             placeShip(currentlyPlacing);
-          } else if(verifiedHitsByComputer.indexOf(index) > -1) {
+          } else if(hitProofStatus && hitProofStatus.status === 'verified') {
             const utxo = ContractUtxos.getComputerUtxoByIndex(index);
             if(utxo) {
               window.open(Whatsonchain.getTxUri(utxo.utxo.txId), '_blank').focus();
@@ -80,7 +79,7 @@ export const PlayerBoard = ({
             }
           }
         }}
-        className={`square ${stateToClass[square]} ${processingHitsByComputer.indexOf(index) > -1 ? 'processing' : (verifiedHitsByComputer.indexOf(index) > -1 ? 'verified' : '')}`}
+        className={`square ${stateToClass[square]} ${hitProofStatus ? hitProofStatus.status : ''}`}
         key={`square-${index}`}
         id={`square-${index}`}
         onMouseOver={() => {

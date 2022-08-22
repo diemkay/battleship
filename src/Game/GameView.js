@@ -15,24 +15,23 @@ export const GameView = ({
   placedShips,
   startTurn,
   computerShips,
+  computerShipsHash,
   gameState,
   changeTurn,
-  hitComputer,
   hitsByPlayer,
   setHitsByPlayer,
   hitsByComputer,
-  verifiedHitsByComputer,
-  verifiedHitsByPlayer,
+  hitsProofToComputer,
+  hitsProofToPlayer,
+  hitComputer, // <- setHitsByComputer ?
   handleComputerTurn,
   checkIfGameOver,
-  winner,
   startAgain,
+  winner,
   setComputerShips,
   playSound,
   deployTxid,
-  runZK,
-  processingHitsByPlayer,
-  processingHitsByComputer
+  handleFire
 }) => {
   return (
     <section id="game-screen">
@@ -62,8 +61,7 @@ export const GameView = ({
         placeShip={placeShip}
         placedShips={placedShips}
         hitsByComputer={hitsByComputer}
-        verifiedHitsByComputer={verifiedHitsByComputer}
-        processingHitsByComputer={processingHitsByComputer}
+        hitsProofToComputer={hitsProofToComputer}
         playSound={playSound}
       />
       <ComputerBoard
@@ -72,15 +70,13 @@ export const GameView = ({
         gameState={gameState}
         hitComputer={hitComputer}
         hitsByPlayer={hitsByPlayer}
-        hitsByComputer={hitsByComputer}
         setHitsByPlayer={setHitsByPlayer}
         handleComputerTurn={handleComputerTurn}
         checkIfGameOver={checkIfGameOver}
         setComputerShips={setComputerShips}
-        verifiedHitsByPlayer={verifiedHitsByPlayer}
-        processingHitsByPlayer={processingHitsByPlayer}
+        hitsProofToPlayer={hitsProofToPlayer}
         playSound={playSound}
-        runZK={runZK}
+        handleFire={handleFire}
       />
     </section>
   );

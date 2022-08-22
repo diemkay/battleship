@@ -99,10 +99,11 @@
   cursor: pointer;
 }
 
-.board .processing {
-  background-image: url('/loading.gif');
-  background-size: 80%;
+.board .pending {
+  background-image: url('/pending.png');
+  background-size: 50%;
   background-repeat: no-repeat;
   background-position: center;
-  cursor: progress;
+  cursor: pointer;
 }
+

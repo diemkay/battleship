@@ -1,3 +1,4 @@
+/* global BigInt */
 import React, { useState, useRef, useEffect } from 'react';
 import { PubKeyHash, num2bin, sha256, bin2num, Int, buildContractClass, bsv, getPreimage, signTx, PubKey } from 'scryptlib';
 import { ContractUtxos, CurrentPlayer, Player, PlayerAddress, PlayerPKH, PlayerPrivkey, PlayerPublicKey } from '../storage';
@@ -16,9 +17,8 @@ import {
   updateSunkShips,
   coordsToIndex,
 } from './layoutHelpers';
-
 import { buildMimc7 } from 'circomlibjs';
-import { ZKProvider } from '../zkProvider';
+import ZKPWorker from '../zkp.worker';
 
 const AVAILABLE_SHIPS = [
   {
@@ -60,13 +60,63 @@ export const Game = ({ desc }) => {
   const [computerShipsHash, setComputerShipsHash] = useState([]);
   const [hitsByPlayer, setHitsByPlayer] = useState([]);
   const [hitsByComputer, setHitsByComputer] = useState([]);
-  const [processingHitsByComputer, setProcessingHitsByComputer] = useState([]); // processing square-index
-  const [processingHitsByPlayer, setProcessingHitsByPlayer] = useState([]); // processing square-index
-  const [verifiedHitsByComputer, setVerifiedHitsByComputer] = useState([]); // verified square-index
-  const [verifiedHitsByPlayer, setVerifiedHitsByPlayer] = useState([]); // verified square-index
+  const [hitsProofToComputer, setHitsProofToComputer] = useState(new Map()); // index: number => {status: 'pending'/'verified', proof?: object}
+  const [hitsProofToPlayer, setHitsProofToPlayer] = useState(new Map()); // structure same as above
   const [battleShipContract, setBattleShipContract] = useState(null); // contract
   const [deployTxid, setDeployTxid] = useState('');
   const [balance, setBalance] = useState(-1);
+
+  const [zkpWorkerForPlayer, setZKPWorkerForPlayer] = useState(null);
+  const [zkpWorkerForComputer, setZKPWorkerForComputer] = useState(null);
+
+  const hp2CRef = useRef(hitsProofToComputer);
+  useEffect(() => {
+    hp2CRef.current = hitsProofToComputer
+  }, [hitsProofToComputer]);
+
+  const hp2PRef = useRef(hitsProofToPlayer);
+  useEffect(() => {
+    hp2PRef.current = hitsProofToPlayer
+  }, [hitsProofToPlayer]);
+
+  const hbpRef = useRef(hitsByPlayer);
+  useEffect(() => {
+    hbpRef.current = hitsByPlayer
+  }, [hitsByPlayer]);
+
+  const hbcRef = useRef(hitsByComputer);
+  useEffect(() => {
+    hbcRef.current = hitsByComputer
+  }, [hitsByComputer]);
+
+  useEffect(() => {
+    const zkpWorkerMsgHandler = event => {
+      const { ctx, isVerified, proof } = event.data;
+      if(isVerified) {
+        const isPlayerFired = ctx.role === 'player';
+        if (isPlayerFired) {
+          setHitsProofToPlayer(new Map(hp2PRef.current.set(ctx.targetIdx, {status: isVerified ? 'verified' : 'failed', proof}))) 
+        } else {
+          setHitsProofToComputer(new Map(hp2CRef.current.set(ctx.targetIdx, {status: isVerified ? 'verified' : 'failed', proof})))
+        }
+
+        // TODO: send tx or use a dedicated tx-sending worker to the job below.
+      }
+    }
+
+    const playerWorker = new ZKPWorker();
+    playerWorker.addEventListener('message', zkpWorkerMsgHandler);
+    setZKPWorkerForPlayer(playerWorker);
+
+    const computerWorker = new ZKPWorker();
+    computerWorker.addEventListener('message', zkpWorkerMsgHandler);
+    setZKPWorkerForComputer(computerWorker);
+
+    return (() => {
+      zkpWorkerForPlayer.terminate();
+      zkpWorkerForComputer.terminate();
+    })
+  }, []);
 
   // *** PLAYER ***
   const selectShip = (shipName) => {
@@ -80,7 +130,7 @@ export const Game = ({ desc }) => {
     });
   };
 
-  const move = async (isPlayer, index, contractUtxo, x, y, hit, proof, newStates) => {
+  const move = async (isPlayerFired, index, contractUtxo, x, y, hit, proof, newStates) => {
 
     console.log('newStates', newStates)
 
@@ -110,7 +160,7 @@ export const Game = ({ desc }) => {
 
 
     }).then(async rawTx => {
-      ContractUtxos.add(rawTx, isPlayer, index);
+      ContractUtxos.add(rawTx, isPlayerFired, index);
 
       setTimeout(async () => {
         web3.wallet.getbalance().then(balance => {
@@ -124,103 +174,6 @@ export const Game = ({ desc }) => {
         console.error('call contract fail', e)
       })
 
-  }
-
-  const runZK = async (index, isPlayer, hit, successfulYourHits, successfulComputerHits) => {
-    const privateInputs = toPrivateInputs(isPlayer ? computerShips : placedShips);
-    const position = idx2Pos(index);
-    const publicInputs = [isPlayer ? computerShipsHash : placedShipsHash, position.x.toString(), position.y.toString(), hit];
-
-    if (isPlayer) {
-      setProcessingHitsByPlayer([...processingHitsByPlayer, index])
-    } else {
-      setProcessingHitsByComputer([...processingHitsByComputer, index]);
-    }
-    
-    console.time("zk")
-    return ZKProvider
-      // computer witness for fire result
-      .computeWitness(privateInputs.concat(publicInputs))
-      .then(async ({ witness, output }) => {
-        return ZKProvider.generateProof(witness);
-      })
-      .then(async proof => {
-        return {
-          isVerified: await ZKProvider.verify(proof),
-          proof: proof
-        }
-      })
-      .then(({
-        proof,
-        isVerified
-      }) => {
-        console.timeEnd("zk")
-        if (isVerified) {
-          // update view
-          console.log(`proof of ${index} verified ${isVerified}`)
-          const contractUtxo = ContractUtxos.getlast().utxo;
-
-          const Proof = battleShipContract.getTypeClassByType("Proof");
-          const G1Point = battleShipContract.getTypeClassByType("G1Point");
-          const G2Point = battleShipContract.getTypeClassByType("G2Point");
-          const FQ2 = battleShipContract.getTypeClassByType("FQ2");
-
-
-          return move(isPlayer, index, contractUtxo, position.x, position.y, hit, new Proof({
-            a: new G1Point({
-              x: new Int(proof.proof.a[0]),
-              y: new Int(proof.proof.a[1]),
-            }),
-            b: new G2Point({
-              x: new FQ2({
-                x: new Int(proof.proof.b[0][1]),
-                y: new Int(proof.proof.b[0][0]),
-              }),
-              y: new FQ2({
-                x: new Int(proof.proof.b[1][1]),
-                y: new Int(proof.proof.b[1][0]),
-              })
-            }),
-            c: new G1Point({
-              x: new Int(proof.proof.c[0]),
-              y: new Int(proof.proof.c[1]),
-            })
-          }), {
-            successfulYourHits: successfulYourHits,
-            successfulComputerHits: successfulComputerHits,
-            yourTurn: !isPlayer
-          })
-
-        } else {
-          console.error('proof not verified for ', index);
-        }
-      })
-      .then(() => {
-        // UPDATE UI
-        if (isPlayer) {
-
-          const i = processingHitsByPlayer.indexOf(index);
-          if (i > -1) {
-            processingHitsByPlayer.splice(i, 1);
-          }
-
-          setProcessingHitsByPlayer(processingHitsByPlayer)
-          setVerifiedHitsByPlayer([...verifiedHitsByPlayer, index])
-        } else {
-
-          const i = processingHitsByComputer.indexOf(index);
-          if (i > -1) {
-            processingHitsByComputer.splice(i, 1);
-          }
-          setProcessingHitsByComputer(processingHitsByComputer)
-          setVerifiedHitsByComputer([...verifiedHitsByComputer, index]);
-        }
-
-      })
-      .catch(e => {
-        console.timeEnd("zk")
-        console.error('processing error:', e)
-      })
   }
 
   const placeShip = (currentlyPlacing) => {
@@ -343,23 +296,9 @@ export const Game = ({ desc }) => {
     setHitsByComputer(computerHits);
 
     if (fireResult) {
-
-
-
-      let successfulYourHits = hitsByPlayer.filter((hit) => hit.type === 'hit').length;
-      let successfulComputerHits = computerHits.filter((hit) => hit.type === 'hit')
-        .length;
-
-      runZK(index, false, layout[index] === 'ship', successfulYourHits, successfulComputerHits)
+      handleFire('computer', index, fireResult.type === 'hit');
     }
   };
-
-  const idx2Pos = (index) => {
-    return {
-      x: index % 10,
-      y: Math.floor(index / 10)
-    }
-  }
 
   // Change to computer turn, check if game over and stop if yes; if not fire into an eligible square
   const handleComputerTurn = () => {
@@ -454,10 +393,38 @@ export const Game = ({ desc }) => {
     setComputerShips([]);
     setHitsByPlayer([]);
     setHitsByComputer([]);
-    setVerifiedHitsByComputer([]);
+    setHitsProofToComputer(new Map());
+    setHitsProofToPlayer(new Map());
     ContractUtxos.clear();
   };
 
+  const handleFire = (role, targetIdx, isHit) => {
+    const isPlayerFired = role === 'player';
+    const privateInputs = toPrivateInputs(isPlayerFired ? computerShips : placedShips);
+    const position = indexToCoords(targetIdx);
+    const publicInputs = [isPlayerFired ? computerShipsHash : placedShipsHash, position.x.toString(), position.y.toString(), isHit];
+
+    if (isPlayerFired) {
+      setHitsProofToPlayer(new Map(hitsProofToPlayer.set(targetIdx, {status: 'pending'})));
+    } else {
+      setHitsProofToComputer(new Map(hitsProofToComputer.set(targetIdx, {status: 'pending'})));
+    }
+
+    const zkpWorker = isPlayerFired ? zkpWorkerForPlayer : zkpWorkerForComputer;
+    // send message to worker
+    zkpWorker.postMessage({
+      // message id
+      ctx: {
+        role,
+        targetIdx,
+        isHit
+      },
+      privateInputs,
+      publicInputs
+    });
+  }
+
+  // *** Zero Knowledge Proof
 
   const sortShipsForZK = (ships) => {
     const SORTED_ZK_SHIP_NAMES = ['carrier', 'battleship', 'cruiser', 'submarine', 'destoryer'];
@@ -471,14 +438,11 @@ export const Game = ({ desc }) => {
         .reduce(
           (res, ship) => {
             const val = ship.position.x + ship.position.y * 16 + (ship.orientation === "horizontal" ? 1 : 0) * 16 * 16
-            // eslint-disable-next-line no-undef
-            const r = BigInt(res) + BigInt(val) * multiplier;
-            // eslint-disable-next-line no-undef
+            const r = res + BigInt(val) * multiplier;
             multiplier *= BigInt(16 ** 3);
-            // eslint-disable-next-line no-undef
-            return BigInt(r);
+            return r;
           },
-          0
+          BigInt(0)
         );
 
     const mimc7 = await buildMimc7();
@@ -498,6 +462,8 @@ export const Game = ({ desc }) => {
         []
       )
   }
+
+  // *** End ZKP **
 
   const sunkSoundRef = useRef(null);
   const clickSoundRef = useRef(null);
@@ -561,10 +527,8 @@ export const Game = ({ desc }) => {
         hitsByPlayer={hitsByPlayer}
         setHitsByPlayer={setHitsByPlayer}
         hitsByComputer={hitsByComputer}
-        verifiedHitsByComputer={verifiedHitsByComputer}
-        verifiedHitsByPlayer={verifiedHitsByPlayer}
-        processingHitsByPlayer={processingHitsByPlayer}
-        processingHitsByComputer={processingHitsByComputer}
+        hitsProofToComputer={hitsProofToComputer}
+        hitsProofToPlayer={hitsProofToPlayer}
         setHitsByComputer={setHitsByComputer}
         handleComputerTurn={handleComputerTurn}
         checkIfGameOver={checkIfGameOver}
@@ -573,7 +537,7 @@ export const Game = ({ desc }) => {
         setComputerShips={setComputerShips}
         playSound={playSound}
         deployTxid={deployTxid}
-        runZK={runZK}
+        handleFire={handleFire}
       />
       <Balance balance={balance}></Balance>
     </React.Fragment>

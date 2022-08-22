@@ -42,7 +42,7 @@ export const App = () => {
 
   useEffect(() => {
     ZKProvider.init();
-  });
+  }, []);
 
   // Renders either Welcome Screen or Game
   return (
